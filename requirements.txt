@@ -1,0 +1,8 @@
+# requirements.txt for AWS Account Authentication
+
+Flask==2.3.3
+boto3==1.28.38
+requests>=2.32.3
+python-dotenv>=1.0.1
+cryptography==41.0.3
+PyJWT==2.8.0
