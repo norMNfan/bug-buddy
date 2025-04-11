@@ -1,4 +1,94 @@
 services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: your_db_user
+      POSTGRES_PASSWORD: your_db_password
+      POSTGRES_DB: your_db_name
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_container
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com  # Set the default email for login
+      PGADMIN_DEFAULT_PASSWORD: admin          # Set the default password for login
+    ports:
+      - "5050:80"  # Expose PgAdmin on port 5050
+    depends_on:
+      - postgres  # Ensure PgAdmin starts after the Postgres container
+    networks:
+      - app_network
+
+  backend:
+    build: ./backend
+    container_name: fastapi_container
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./sql_app.db
+    networks:
+      - app_network
+
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  celery_worker:
+    build: ./backend
+    container_name: celery_worker
+    command: celery -A app.tasks worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+    networks:
+      - app_network
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+
+  celery_beat:
+    build: ./backend
+    container_name: celery_beat
+    command: celery -A app.tasks beat --loglevel=info
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+    networks:
+      - app_network
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+
+  flower:
+    build: ./backend
+    container_name: flower_container
+    command: celery -A app.tasks flower --port=5555
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - celery_worker
+    networks:
+      - app_network
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
 
   frontend:
     build: ./frontend
@@ -10,3 +100,15 @@ services:
       - "4321:4321"
     environment:
       - HOST=0.0.0.0
+      - API_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:  # Correctly define the named volume here

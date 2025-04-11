@@ -1,0 +1,16 @@
+fastapi[standard]
+fastapi-mail
+sqlmodel
+sqlalchemy
+uvicorn[standard]
+psycopg2-binary
+passlib[bcrypt]
+python-jose
+pydantic
+bcrypt==3.2.0
+alembic
+celery
+redis
+flower
+celery[redis]
+sqlalchemy-celery-beat
