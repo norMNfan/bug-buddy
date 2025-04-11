@@ -45,11 +45,16 @@ def check_switches():
 
         for switch in db_switches:
             print(f"Switch: {switch.id} - {switch.name} - {switch.expiration_datetime}")
-            
+
             # Check if expiration is less than 7 days away
-            if switch.expiration_datetime and switch.expiration_datetime <= seven_days_from_now:
+            if (
+                switch.expiration_datetime
+                and switch.expiration_datetime <= seven_days_from_now
+            ):
                 # Send email notification
-                send_expiration_email(switch.user_email, switch.name, switch.expiration_datetime)
+                send_expiration_email(
+                    switch.user_email, switch.name, switch.expiration_datetime
+                )
 
         # Make sure to close the session
         db.close()
@@ -58,7 +63,10 @@ def check_switches():
         print(f"Error getting switches: {e}")
         return
 
-def send_expiration_email(recipient_email: str, switch_name: str, expiration_date: datetime):
+
+def send_expiration_email(
+    recipient_email: str, switch_name: str, expiration_date: datetime
+):
     # Email configuration
     smtp_server = os.getenv("MAIL_SERVER")
     smtp_port = int(os.getenv("MAIL_PORT", 587))
@@ -75,12 +83,12 @@ def send_expiration_email(recipient_email: str, switch_name: str, expiration_dat
     body = f"""
     <html>
         <body>
-            <p>Your switch '{switch_name}' will expire on {expiration_date.strftime('%Y-%m-%d')}.</p>
+            <p>Your switch '{switch_name}' will expire on {expiration_date.strftime("%Y-%m-%d")}.</p>
             <p>Please take necessary action.</p>
         </body>
     </html>
     """
-    
+
     # Add body to email
     message.attach(MIMEText(body, "html"))
 
