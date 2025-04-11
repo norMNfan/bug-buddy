@@ -1,0 +1,28 @@
+---
+import Layout from '@layouts/Default.astro';
+import { Pill, Button } from "@eliancodes/brutal-ui";
+import SwitchList from '@components/switches/SwitchList.astro';
+
+// Fetch switches from the API
+const fetchSwitches = async () => {
+  const response = await fetch(`${process.env.API_URL}/switches`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch switches: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+// Fetch switches
+const switches = await fetchSwitches();
+
+---
+<Layout
+  title='Switches'
+  description='description'
+  pageTitle='Switches'
+>
+  <main class='bg-white p-6 space-y-4'>
+    <Button href={`/switches/create_switch`} color="green">Create Switch</Button>
+    <SwitchList switches={switches} />
+  </main>
+</Layout>

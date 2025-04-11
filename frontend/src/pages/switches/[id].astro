@@ -1,0 +1,35 @@
+---
+import Layout from '@layouts/Default.astro';
+import SwitchForm from '@components/SwitchForm';
+
+// Ensure this page is rendered dynamically
+export const prerender = false;
+
+// Fetch the dynamic route parameter (id)
+const { id } = Astro.params;
+
+// Fetch the switch data from the API
+const fetchSwitches = async () => {
+  const response = await fetch(`${process.env.API_URL}/switches/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch switches: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+// Fetch switches
+const response = await fetchSwitches();
+
+const switchItem = response;
+
+if (!switchItem) {
+  throw new Error('Switch not found');
+}
+---
+<Layout
+  title='Switches'
+  description='description'
+  pageTitle='Switches'
+>
+  <SwitchForm client:load switchItem={switchItem} />
+</Layout>

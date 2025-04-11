@@ -1,0 +1,40 @@
+---
+interface Props {
+  pageTitle?: string;
+}
+
+const navigationItems = [
+  { name: 'Home', url: '/' },
+  { name: 'Switches', url: '/switches/' },
+  { name: 'Sign In', url: '/signin/' },
+  { name: 'Sign Out', url: '/api/auth/signout/' },
+];
+
+const { pageTitle } = Astro.props;
+---
+
+<header class='border-b-4 border-black flex justify-between p-6 items-center'>
+  {pageTitle && <h1 class='hidden'>{pageTitle}</h1>}
+  <a href='/' title='Back to Home' class="flex items-center gap-4">
+    <img src="/android-chrome-512x512.png" alt="Dead Man Logo" class="w-12 h-12" />
+    <p class='outfit md:text-5xl'>Dead Man</p>
+  </a>
+  <nav class='hidden md:inline-block'>
+    <h2 class='hidden'>Navigation</h2>
+    <ul class='flex gap-8 poppins'>
+      {
+        navigationItems.map((item) => (
+          <li>
+            <a
+              class='text-lg font-medium hover:text-green hover:underline transition-all duration-150 ease-in-out'
+              href={item.url}
+              title={`Go to ${item.name}`}
+            >
+              {item.name}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>

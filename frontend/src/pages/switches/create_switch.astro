@@ -1,0 +1,16 @@
+---
+import Layout from '@layouts/Default.astro';
+import { supabase } from "../../lib/supabase";
+import CreateSwitchForm from '../../components/CreateSwitchForm';
+
+// Get user session
+const { data: { session } } = await supabase.auth.getSession();
+const userEmail = session?.user?.email;
+
+---
+<Layout 
+  title="Create Switch" 
+  description='description'
+  pageTitle='Switches'>
+  <CreateSwitchForm userEmail={userEmail || ''} client:load />
+</Layout>

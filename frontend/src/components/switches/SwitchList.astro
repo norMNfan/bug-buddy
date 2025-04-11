@@ -1,0 +1,41 @@
+---
+import { SwitchSummaryCard } from './SwitchSummaryCard.tsx';
+import { supabase } from "../../lib/supabase";
+
+// Get user session
+const { data: { session } } = await supabase.auth.getSession();
+const userEmail = session?.user?.email;
+
+const fetchSwitches = async () => {  
+  const response = await fetch(`${process.env.API_URL}/switches/list`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_email: userEmail }),
+  });
+  
+  if (!response.ok) {
+    console.error(`Error status: ${response.status}`);
+    console.error(`Error text: ${await response.text()}`);
+    throw new Error(`Failed to fetch switches: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+// Fetch switches only if we have a user email
+const response = userEmail ? await fetchSwitches() : { switches: [] };
+---
+
+<ul class="space-y-4">
+  {
+    response["switches"].map((sw) => {
+      return (
+        <li class="w-full">
+            <SwitchSummaryCard switch={sw} client:load/>
+        </li>
+      );
+    })
+  }
+</ul>
+
