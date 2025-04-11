@@ -3,12 +3,6 @@
   "version": "1.2.0",
   "type": "module",
   "packageManager": "pnpm@8.6.0",
-  "author": {
-    "name": "Elian Van Cutsem",
-    "email": "hello@elian.codes",
-    "url": "https://www.elian.codes/"
-  },
-  "homepage": "https://brutal.elian.codes",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -24,6 +18,9 @@
     "@astrojs/vercel": "^8.0.2",
     "@auth/core": "^0.37.4",
     "@eliancodes/brutal-ui": "^0.2.3",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^7.0.2",
     "@supabase/supabase-js": "^2.47.16",
     "@unocss/astro": "^0.57.7",
     "astro": "^5.1.5",

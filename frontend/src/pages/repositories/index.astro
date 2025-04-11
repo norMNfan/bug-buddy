@@ -1,29 +1,44 @@
 ---
 import Layout from '@layouts/Default.astro';
 import { Button } from "@eliancodes/brutal-ui";
-import SwitchList from '@components/switches/SwitchList.astro';
+import { supabase } from "../../lib/supabase";
+import RepositoryList from "../../components/repositories/RepositoryList.astro"
 
-// Fetch switches from the API
-const fetchSwitches = async () => {
-  const response = await fetch(`${process.env.API_URL}/switches`);
+
+// Get user session
+const { data: { session } } = await supabase.auth.getSession();
+const userEmail = session?.user?.email;
+
+async function fetchUserRepositories(username, token) {
+  const url = `https://api.github.com/users/${username}/repos`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `token ${token}`,
+      'Accept': 'application/vnd.github.v3+json',
+    },
+  });
+
   if (!response.ok) {
-    throw new Error(`Failed to fetch switches: ${response.statusText}`);
+    throw new Error(`Error fetching repositories: ${response.statusText}`);
   }
-  return response.json();
-};
 
-// Fetch switches
-const switches = await fetchSwitches();
+  const repositories = await response.json();
+  return repositories;
+}
 
-// const fetchRepos = async () => {
-//   const response = await fetch(`${process.env.API_URL}/repos`);
-//   if (!response.ok) {
-//     throw new Error(`Failed to fetch repos: ${response.statusText}`);
-//   }
-//   return response.json();
-// };
+// Example usage
+const username = 'norMNfan';
+const token = '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';
 
-// const repos = await fetchRepos();
+const repositories = fetchUserRepositories(username, token)
+  .then(repos => {
+    console.log('User Repositories:', repos);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
 
 ---
 <Layout
@@ -33,7 +48,6 @@ const switches = await fetchSwitches();
 >
   <main class='bg-white p-6 space-y-4'>
     <Button href={`/switches/create_switch`} color="green">Fix Bugs (TODO)</Button>
-    <SwitchList switches={switches} />
-    <!-- <RepoList repos={repos} /> -->
+    <RepositoryList repositories={repositories} />
   </main>
 </Layout>
