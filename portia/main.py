@@ -8,7 +8,8 @@ from portia import (
     PortiaToolRegistry,
     example_tool_registry
 )
-from github_actions.github_tools import *
+from github_actions import *
+from aws_actions import *
 
 github_tools = PortiaToolRegistry([
     InitializeGitHubClient(),
@@ -19,6 +20,13 @@ github_tools = PortiaToolRegistry([
     CreateGitHubIssue(),
     GitHubAddCommitFile(),
     CreateGitHubPullRequest(),
+])
+
+aws_tools = PortiaToolRegistry([
+    InitializeAWSClient(),
+    ListAWSLogGroups(),
+    GetMostRecentLogStream(),
+    ListenForErrorLogs()
 ])
 
 
@@ -34,7 +42,7 @@ anthropic_config = Config.from_default(
 
 def instantiate_portia():
     # TODO: Pass tool registry
-    portia = Portia(config=anthropic_config, tools=github_tools)
+    portia = Portia(config=anthropic_config, tools=github_tools + aws_tools)
     return portia
 
 def execute_query(portia_instance, query: str):
