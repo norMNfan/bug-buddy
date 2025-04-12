@@ -1,6 +1,7 @@
 ---
 import Layout from '@layouts/Default.astro';
 import RepositoryDetailPage from "../../components/RepositoryDetailPage.tsx"
+import Button from '@mui/material/Button';
 
 const { id } = Astro.params;
 const token = import.meta.env.GITHUB_TOKEN;
@@ -23,6 +24,31 @@ async function fetchRepository() {
   return await response.json();
 }
 
+
+const analyze = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent the default form submission
+
+    try {
+      console.log("Analyze function called");
+      
+      const analyzeResponse = await fetch('/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!analyzeResponse.ok) {
+        throw new Error(`Error analyzing repositories: ${analyzeResponse.statusText}`);
+      }
+
+      const result = await analyzeResponse.json();
+      console.log("Analysis result:", result);
+    } catch (error) {
+      console.error("Error during analysis:", error);
+    }
+  };
+
 const repository = await fetchRepository();
 
 ---
@@ -31,5 +57,11 @@ const repository = await fetchRepository();
   description='description'
   pageTitle='Repository'
 >
+
+<form onSubmit={analyze}>
+  <Button type="submit" variant="contained" color="primary">
+    Analyze Repo
+  </Button>
+</form>
   <RepositoryDetailPage client:load repo={repository} />
 </Layout>

@@ -1,13 +1,7 @@
 ---
 import Layout from '@layouts/Default.astro';
-import { supabase } from "../../lib/supabase";
-import RepositoryList from "../../components/repositories/RepositoryList.astro"
-import { record } from 'astro:schema';
+import RepoList from "../../components/repositories/RepoList.tsx"
 
-
-// Get user session
-const { data: { session } } = await supabase.auth.getSession();
-const userEmail = session?.user?.email;
 
 async function fetchUserRepositories(username, token) {
   const url = `https://api.github.com/users/${username}/repos`;
@@ -25,67 +19,13 @@ async function fetchUserRepositories(username, token) {
   }
 
   const repositories = await response.json();
-  saveRepos(username, repositories);
   return repositories;
 }
 
-const saveRepos = async (username, repos) => {  
-  const payload = {
-    repos: repos.map(repo =>({
-      id: String(repo.id),
-      full_name: repo.full_name,
-      username: username,
-    }))
-  }
+  const username = import.meta.env.GITHUB_USERNAME;
+  const token = import.meta.env.GITHUB_TOKEN;
 
-  const response = await fetch(`${process.env.API_URL}/repos`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-  
-  if (!response.ok) {
-    console.error(`Error status: ${response.status}`);
-    console.error(`Error text: ${await response.text()}`);
-    throw new Error(`Failed to fetch repos: ${response.statusText}`);
-  }
-  return response.json();
-};
-
-const getRepos = async (username) => {
-  const response = await fetch(`${process.env.API_URL}/repos`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  console.log(response.json());
-  
-  if (!response.ok) {
-    console.error(`Error status: ${response.status}`);
-    console.error(`Error text: ${await response.text()}`);
-    throw new Error(`Failed to fetch repos: ${response.statusText}`);
-  }
-
-  return response;
-};
-
-const username = import.meta.env.GITHUB_USERNAME;
-const token = import.meta.env.GITHUB_TOKEN;
-
-
-
-const repositories = fetchUserRepositories(username, token)
-  .then(repos => {
-    // console.log('User Repositories:', repos);
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-
-  const repos = getRepos(username);
+  const repos = await fetchUserRepositories(username, token);
 
 ---
 <Layout
@@ -93,13 +33,7 @@ const repositories = fetchUserRepositories(username, token)
   description='description'
   pageTitle='Repositories'
 >
-  <!-- <button 
-    type="submit" 
-    className="border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0)] dark:hover:shadow-[1px_1px_0px_0px_rgba(255,255,255)] transition-all"
-  >
-    Analyze
-  </button> -->
   <main class='bg-white p-6 space-y-4'>
-    <RepositoryList repos={repos} />
+    <RepoList repos={repos}/>
   </main>
 </Layout>
