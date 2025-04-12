@@ -81,6 +81,9 @@ const repository = await fetchRepository();
     try {
       console.log("Create Plan function called");
       
+      /////////////////
+      // CREATE PLAN //
+      /////////////////
       const createPlanResponse = await fetch('http://localhost:8000/repos/createplan', {
         method: 'POST',
         headers: {
@@ -105,6 +108,37 @@ const repository = await fetchRepository();
         <h2>Plan Created</h2>
         <p><strong>Plan ID:</strong> ${planId}</p>
       `;
+
+      /////////////////////
+      // GET PLAN STATUS //
+      /////////////////////
+      console.log("Fetching plan from PortiaLabs API...");
+      const portiaResponse = await fetch(`https://api.portialabs.ai/api/v0/plan-runs/${planId}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Api-Key prt-kswmXP7S.zNgfdbSGUg3IHeZKkvQzb9xFX2vMv3ei'
+        },
+      });
+
+      if (!portiaResponse.ok) {
+        throw new Error(`PortiaLabs API failed: ${portiaResponse.statusText}`);
+      }
+
+      const portiaResult = await portiaResponse.json();
+      console.log("Portia result success:", portiaResult);
+
+      analysisResultContainer.innerHTML = `
+        <h2>Plan Analysis</h2>
+        <p><strong>Plan ID:</strong> ${planId}</p>
+        <h3>PortiaLabs API Result:</h3>
+        <pre>${JSON.stringify(portiaResult, null, 2)}</pre>
+      `;
+
+
+      //////////////
+      // RUN PLAN //
+      //////////////
 
       // Save and use the output value to call /repos/runplan
       console.log("Step 2: Running plan with plan ID:", planId);

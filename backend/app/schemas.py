@@ -11,9 +11,8 @@ class Repo(BaseModel):
 class Repos(BaseModel):
     repos: List[Repo]
 
-class Analysis(BaseModel):
-    id: str
-    log_group: str
+class CreatePlanResponse(BaseModel):
     plan_id: str
-    query_steps: List[Any]
-    plan: Plan
+
+class RunPlanResponse(BaseModel):
+    output: str

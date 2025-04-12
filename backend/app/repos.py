@@ -7,7 +7,7 @@ from functools import wraps
 import asyncio
 
 from .database import get_db
-from .schemas import Analysis, Repo, Repos
+from .schemas import CreatePlanResponse, RunPlanResponse, Repo, Repos
 from .models import Repo as RepoModel
 
 from .portia_impl import create_plan, run_plan
@@ -67,7 +67,7 @@ def log_operation(func):
 # ANALYZE #
 ###########
 # TODO - Implement AI Agent
-@router.post("/createplan", response_model=Analysis)
+@router.post("/createplan", response_model=CreatePlanResponse)
 @log_operation
 async def analyze(request: CreatePlanRequest, db: Session = Depends(get_db)):
     repo_name_to_log_group_map = {
@@ -79,47 +79,24 @@ async def analyze(request: CreatePlanRequest, db: Session = Depends(get_db)):
     plan = create_plan()
 
     match = re.search(r"UUID\('([a-f0-9\-]{36})'\)", str(plan))
-    plan_id = match.group(1)
-
-    # Extract query string
-    query_match = re.search(r"query='(.*?)'", str(plan))
-    query_str = query_match.group(1).encode('utf-8').decode('unicode_escape') if query_match else None
-
-    # Split query into steps
-    query_steps = [line.strip() for line in query_str.split('\n') if line.strip()] if query_str else []
-
-    print(query_steps)
+    plan_id = "plan-" + match.group(1)
     
-    response = Analysis(
-        id='1234', 
-        log_group=log_group, 
-        plan_id=plan_id, 
-        query_steps=[],
-        plan=plan
+    response = CreatePlanResponse(
+        plan_id=plan_id
     )
 
     return response
 
 
-@router.post("/runplan", response_model=Analysis)
+@router.post("/runplan", response_model=CreatePlanResponse)
 @log_operation
 async def analyze(request: RunPlanRequest, db: Session = Depends(get_db)):
-    # repo_name_to_log_group_map = {
-    #     "norMNfan/hello-aws": "/aws/lambda/sam-app-HelloWorldFunction-4ifWr8G1aiJP"
-    # }
-
-    # log_group = repo_name_to_log_group_map[request.full_name]
-
     plan_id = request.plan_id
 
     plan_result = run_plan(plan_id)
 
-    response = Analysis(
-        id='1234', 
-        log_group="log_group", 
-        plan_id=None, 
-        query_steps=None, 
-        plan=plan_result
+    response = RunPlanResponse(
+        output=str(plan_result)
     )
 
     return response

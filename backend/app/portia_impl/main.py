@@ -89,7 +89,7 @@ def create_plan():
 
 
     query = """
-1. List the log groups
+        1. List the log groups
         2. then select the first log group
         3. then list all the log streams for that group
         4. then listen for error logs in that most recent stream
