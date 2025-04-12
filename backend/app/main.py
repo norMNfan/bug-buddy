@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import init_db
-from .routers import switches
-from .mock_data import init_mock_data
+from .routers import repos
 
 app = FastAPI()
 
@@ -11,7 +10,6 @@ app = FastAPI()
 @app.on_event("startup")
 async def startup_event():
     init_db()
-    init_mock_data()
 
 
 # Add CORS middleware
@@ -24,4 +22,4 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(switches.router, prefix="/repos", tags=["repos"])
+app.include_router(repos.router, prefix="/repos", tags=["repos"])

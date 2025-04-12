@@ -1,6 +1,6 @@
 # bug-buddy
 
-**Bud Buddy** is a web app
+**Bud Buddy** is a web app 
 
 ## Development
 
