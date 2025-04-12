@@ -96,13 +96,15 @@ def create_plan():
         3. then list all the log streams for that group
         4. then listen for error logs in that most recent stream
         5. if there are any error logs, as in the list is not empty, ask the user on how to handle this via either creating a PR or an ISSUE using the on_error_log_human_decision tool
+            DO NOT CONTINUE UNTIL AFTER THE HUMAN HAS PROVIDED A RESPONSE
         6. list all the repos under this user: {GITHUB_USERNAME}
-        7. list files under this repo: {REPO_NAME} for owner: {GITHUB_USERNAME}
+        7. list files under this repo: {REPO_NAME} for owner: {GITHUB_USERNAME} at the root of the repo
         8. from those list of files, select the one that is best associated with the error using the owner and repo info form before
         9. view the contents of the selected file using the owner and repo information from before
-        10. propose a fix for this error given the contents of the file from before, and output a diff of the solution and the existing content
-        11. Create an issue in Github with the proposed changes using Github credentials from before
-        12. In the final output, format the before and after diff using markdown
+        10. based on the human input, you should do either of the following:
+            if the human stated ISSUE, create a ISSUE like a bug report, stating the errors found in the logs. Use the repo and owner information from before. you decide the title and body appropriately of the issue
+            if the human stated PR:
+                commit a change to the selected file on the head branch called bug-fix, and base branch as main, with your proposed fix of the error given the contents of the selected file. you appropriately decide on the body and title of the PR. use the repo and owner information from the previous steps
         """.format(GITHUB_USERNAME=GITHUB_USERNAME, REPO_NAME=REPO_NAME)
 
     plan = portia.plan(query)
@@ -131,19 +133,26 @@ def resume_run(plan_run_id:str, user_input:str):
     plan_run = my_store.get_plan_run(plan_run_id)
     plan = my_store.get_plan(plan_run.plan_id)
 
-    resumed_plan_run = portia.resume(plan_run, plan_run_id)
+    # resumed_plan_run = portia.resume(plan_run, plan_run_id)
 
-    while resumed_plan_run.state == PlanRunState.NEED_CLARIFICATION:
+    while plan_run.state == PlanRunState.NEED_CLARIFICATION:
         for clarification in plan_run.get_outstanding_clarifications():
-            print(clarification)
+            resumed_plan_run = portia.resolve_clarification(clarification, user_input, plan_run)
 
+        resumed_plan_run = portia.resume(plan_run, resumed_plan_run.id)
+        # portia.run
+    
     return resumed_plan_run
 
 
-if __name__ == "__main__":
-    plan = create_plan()
-    plan_id = plan.id
+# if __name__ == "__main__":
+#     plan = create_plan()
+#     plan_id = plan.id
 
-    plan_start = run_plan(plan_id)
+#     plan_start = run_plan(plan_id)
 
-    print(plan_start)
+#     plan_run_id = plan_start.plan_run_id
+
+#     resumed_run = resume_run(plan_run_id, "ISSUE")
+#     print("\n RESUMED RUN")
+#     print(resumed_run)
