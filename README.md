@@ -14,14 +14,26 @@ docker-compose up --build
 
 ## Tech Stack
 
-![](https://github.com/norMNfan/bug-buddy/blob/main/logos/astro-logo.png)
-![](https://github.com/norMNfan/bug-buddy/blob/main/logos/react-logo.png)
-- **Frontend**: Astro + React
-![](https://github.com/norMNfan/bug-buddy/blob/main/logos/python-logo.png)
-![](https://github.com/norMNfan/bug-buddy/blob/main/logos/fastapi-logo.png)
-- **Backend**: Python + FastAPI
-![](https://github.com/norMNfan/bug-buddy/blob/main/logos/docker-logo.png)
-- **Containerization**: Docker
-![](https://github.com/norMNfan/bug-buddy/blob/main/logos/portia-logo.png)
-- **AI Agent**: Portia
+<div style="display: flex; align-items: center; gap: 10px;">
+  <img src="https://github.com/norMNfan/bug-buddy/blob/main/logos/astro-logo.png" alt="Astro Logo" style="width: 30px; height: 30px;">
+  <img src="https://github.com/norMNfan/bug-buddy/blob/main/logos/react-logo.png" alt="React Logo" style="width: 30px; height: 30px;">
+  <span><strong>Frontend</strong>: Astro + React</span>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px;">
+  <img src="https://github.com/norMNfan/bug-buddy/blob/main/logos/python-logo.jpeg" alt="Python Logo" style="width: 30px; height: 30px;">
+  <img src="https://github.com/norMNfan/bug-buddy/blob/main/logos/fastapi-logo.png" alt="FastAPI Logo" style="width: 30px; height: 30px;">
+  <span><strong>Backend</strong>: Python + FastAPI</span>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px;">
+  <img src="https://github.com/norMNfan/bug-buddy/blob/main/logos/docker-logo.png" alt="Docker Logo" style="width: 30px; height: 30px;">
+  <span><strong>Containerization</strong>: Docker</span>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px;">
+  <img src="https://github.com/norMNfan/bug-buddy/blob/main/logos/portia-logo.jpeg" alt="Portia Logo" style="width: 30px; height: 30px;">
+  <span><strong>AI Agent</strong>: Portia</span>
+</div>
+
 
