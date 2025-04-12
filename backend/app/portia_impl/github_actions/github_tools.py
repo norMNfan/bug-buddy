@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
-from portia import Tool, ToolRunContext
+from portia import Tool, ToolRunContext, MultipleChoiceClarification
 from .github_client_manager import GitHubClientManager
-from typing import Any
+from typing import Any, List, Literal
 
 class ListReposSchema(BaseModel):
     user: str = Field(..., description="GitHub username whose repositories should be listed")
@@ -69,6 +69,51 @@ class InitializeGitHubClient(Tool):
     def run(self, _:ToolRunContext, token: str, username: str):
         GitHubClientManager.initialize(token, username)
         return f"GitHub client initialized for user {username}"
+
+
+"""
+    Human input clarification
+"""
+class OnErrorLogFoundHumanDecisionSchema(BaseModel):
+    """Input for the OnErrorLogFoundHumanDecisionTool."""
+
+    error_logs: List[str] = Field(
+        description="The list of error logs"
+    )
+
+    human_decision: Literal["PR", "ISSUE"] | None = Field(
+        None,
+        description=(
+            "Whether we create a PR or create an ISSUE.\n"
+            "This MUST be set to None until the clarification check has been done.\n"
+            "If the human says PR, this value will be 'PR'.\n"
+            "If the human says ISSUE, this value will be 'ISSUE'."
+        ),
+    )
+
+class OnErrorLogFoundHumanDecisionTool(Tool):
+    id: str = "on_error_log_human_decision"
+    name: str = "on_error_log_human_decision"  
+    description: str = "Query the user on how to address the error via making a PR or an ISSUE."  
+    args_schema: type[BaseModel] = OnErrorLogFoundHumanDecisionSchema
+    output_schema: tuple[str, str] = (
+            "str",
+            "PR or ISSUE depending on the human decision",
+        )
+    def run(self, context:ToolRunContext, error_logs: List[str], human_decision: Literal["PR", "ISSUE"] | None = None) -> Any:
+        if human_decision is None:
+            return MultipleChoiceClarification(
+                plan_run_id=context.plan_run_id,
+                user_guidance=(
+                    "I've found the following error(s) in your logs:\n"
+                    f"{error_logs}"
+                    "You can choose to either make a PR where I suggest a fix or create an ISSUE"
+                ),
+                argument_name="human_decision",
+                options=["PR", "ISSUE"],
+            )
+        else:
+            return human_decision
 
 
 
