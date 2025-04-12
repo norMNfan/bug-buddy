@@ -99,10 +99,10 @@ def create_plan():
             DO NOT CONTINUE UNTIL AFTER THE HUMAN HAS PROVIDED A RESPONSE
         6. list all the repos under this user: {GITHUB_USERNAME}
         7. list files under this repo: {REPO_NAME} for owner: {GITHUB_USERNAME} at the root of the repo
-        8. from those list of files, select the one that is best associated with the error using the owner and repo info form before
-        9. view the contents of the selected file using the owner and repo information from before
+        8. from those list of files, select the one that is best associated with the error using the owner and repo info form before. Use the {REPO_NAME} as repo and owner as {GITHUB_USERNAME}
+        9. view the contents of the selected file using the owner and repo information from before. Use the Use the {REPO_NAME} as repo and owner as {GITHUB_USERNAME}
         10. based on the human input, you should do either of the following:
-            if the human stated ISSUE, create a ISSUE like a bug report, stating the errors found in the logs. Use the repo and owner information from before. you decide the title and body appropriately of the issue
+            if the human stated ISSUE, create an ISSUE like a bug report, stating the errors found in the logs. Use the {REPO_NAME} as repo and owner as {GITHUB_USERNAME} from before. you decide the title and body appropriately of the issue
             if the human stated PR:
                 commit a change to the selected file on the head branch called bug-fix, and base branch as main, with your proposed fix of the error given the contents of the selected file. you appropriately decide on the body and title of the PR. use the repo and owner information from the previous steps
         """.format(GITHUB_USERNAME=GITHUB_USERNAME, REPO_NAME=REPO_NAME)
