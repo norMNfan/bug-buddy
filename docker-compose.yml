@@ -37,59 +37,6 @@ services:
     networks:
       - app_network
 
-  redis:
-    image: redis:latest
-    container_name: redis_container
-    ports:
-      - "6379:6379"
-    networks:
-      - app_network
-
-  celery_worker:
-    build: ./backend
-    container_name: celery_worker
-    command: celery -A app.tasks worker --loglevel=info
-    volumes:
-      - ./backend:/app
-    depends_on:
-      - redis
-    networks:
-      - app_network
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-
-  celery_beat:
-    build: ./backend
-    container_name: celery_beat
-    command: celery -A app.tasks beat --loglevel=info
-    volumes:
-      - ./backend:/app
-    depends_on:
-      - redis
-    networks:
-      - app_network
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-
-  flower:
-    build: ./backend
-    container_name: flower_container
-    command: celery -A app.tasks flower --port=5555
-    ports:
-      - "5555:5555"
-    volumes:
-      - ./backend:/app
-    depends_on:
-      - redis
-      - celery_worker
-    networks:
-      - app_network
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-
   frontend:
     build: ./frontend
     container_name: frontend_container

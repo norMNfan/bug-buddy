@@ -10,3 +10,5 @@
 .DS_Store
 
 /frontend/.env
+/backend/app/portia/.env
+*.env

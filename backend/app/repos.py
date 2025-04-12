@@ -5,9 +5,13 @@ from pydantic import BaseModel
 from functools import wraps
 import asyncio
 
-from ..database import get_db
-from ..schemas import Analysis, Repo, Repos
-from ..models import Repo as RepoModel
+from .database import get_db
+from .schemas import Analysis, Repo, Repos
+from .models import Repo as RepoModel
+
+# from portia.main_module import main as ai_agent
+
+from .portia.main import main as ai_agent
 
 router = APIRouter()
 
@@ -68,6 +72,8 @@ async def analyze(request: AnalyzeRepoRequest, db: Session = Depends(get_db)):
     }
 
     log_group = repo_name_to_log_group_map[request.full_name]
+
+    ai_agent()
     
     response = Analysis(id='1234', log_group=log_group)
 
