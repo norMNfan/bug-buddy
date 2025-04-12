@@ -1,35 +1,35 @@
 ---
 import Layout from '@layouts/Default.astro';
-import SwitchForm from '@components/SwitchForm';
+import RepositoryDetailPage from "../../components/RepositoryDetailPage.tsx"
 
-// Ensure this page is rendered dynamically
-export const prerender = false;
-
-// Fetch the dynamic route parameter (id)
 const { id } = Astro.params;
+const token = import.meta.env.GITHUB_TOKEN;
 
-// Fetch the switch data from the API
-const fetchSwitches = async () => {
-  const response = await fetch(`${process.env.API_URL}/switches/${id}`);
+async function fetchRepository() {
+  const url = `https://api.github.com/repositories/${id}`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `token ${token}`,
+      'Accept': 'application/vnd.github.v3+json',
+    },
+  });
+
   if (!response.ok) {
-    throw new Error(`Failed to fetch switches: ${response.statusText}`);
+    throw new Error(`Error fetching repository: ${response.statusText}`);
   }
-  return response.json();
-};
 
-// Fetch switches
-const response = await fetchSwitches();
-
-const switchItem = response;
-
-if (!switchItem) {
-  throw new Error('Switch not found');
+  return await response.json();
 }
+
+const repository = await fetchRepository();
+
 ---
 <Layout
-  title='Switches'
+  title='Repository'
   description='description'
-  pageTitle='Switches'
+  pageTitle='Repository'
 >
-  <SwitchForm client:load switchItem={switchItem} />
+  <RepositoryDetailPage client:load repo={repository} />
 </Layout>

@@ -36,11 +36,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 const { data: { session } } = await supabase.auth.getSession();
 const userEmail = session?.user?.email;
 
-// Hardcode the username and access token
-const username = import.meta.env.GITHUB_USERNAME;
-const token = import.meta.env.GITHUB_TOKEN;
-
-
 async function fetchUserRepositories(username, token) {
   const url = `https://api.github.com/users/${username}/repos`;
 
@@ -60,43 +55,49 @@ async function fetchUserRepositories(username, token) {
   return repositories;
 }
 
+// Hardcode the username and access token
+const username = import.meta.env.GITHUB_USERNAME;
+const token = import.meta.env.GITHUB_TOKEN;
+
 const response = await fetchUserRepositories(username, token);
 ---
 
-    <main>
-      <h1>Repositories for {username}</h1>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 700 }} aria-label="customized table">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell>Name</StyledTableCell>
-              <StyledTableCell>Description</StyledTableCell>
-              <StyledTableCell>Owner</StyledTableCell>
-              <StyledTableCell>Link</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {response.map(repo => (
-              <StyledTableRow key={repo.id}>
-                <StyledTableCell component="th" scope="row">
-                  {repo.name}
-                </StyledTableCell>
-                <StyledTableCell>{repo.description || 'No description available.'}</StyledTableCell>
-                <StyledTableCell>
-                  <a href={`https://github.com/${repo.owner.login}`} target="_blank" rel="noopener noreferrer">
-                    <img src={repo.owner.avatar_url} alt={`${repo.owner.login}'s avatar`} width="20" height="20" />
-                    {repo.owner.login}
-                  </a>
-                </StyledTableCell>
-                <StyledTableCell>
-                  <a href={repo.html_url} target="_blank" rel="noopener noreferrer">View Repository</a>
-                </StyledTableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </main>
+<main>
+    <h1>Repositories for {username}</h1>
+    <TableContainer component={Paper}>
+    <Table sx={{ minWidth: 700 }} aria-label="customized table">
+        <TableHead>
+        <TableRow>
+            <StyledTableCell>Name</StyledTableCell>
+            <StyledTableCell>Description</StyledTableCell>
+            <StyledTableCell>Owner</StyledTableCell>
+            <StyledTableCell>Link</StyledTableCell>
+        </TableRow>
+        </TableHead>
+        <TableBody>
+        {response.map(repo => (
+            <StyledTableRow key={repo.id}>
+            <StyledTableCell component="th" scope="row">
+                <a href={`/repositories/${repo.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                {repo.name}
+                </a>
+            </StyledTableCell>
+            <StyledTableCell>{repo.description || 'No description available.'}</StyledTableCell>
+            <StyledTableCell>
+                <a href={`https://github.com/${repo.owner.login}`} target="_blank" rel="noopener noreferrer">
+                <img src={repo.owner.avatar_url} alt={`${repo.owner.login}'s avatar`} width="20" height="20" />
+                {repo.owner.login}
+                </a>
+            </StyledTableCell>
+            <StyledTableCell>
+                <a href={repo.html_url} target="_blank" rel="noopener noreferrer">View Repository</a>
+            </StyledTableCell>
+            </StyledTableRow>
+        ))}
+        </TableBody>
+    </Table>
+    </TableContainer>
+</main>
   
   <style>
     .repository-table img {

@@ -1,6 +1,5 @@
 ---
 import Layout from '@layouts/Default.astro';
-import { Button } from "@eliancodes/brutal-ui";
 import { supabase } from "../../lib/supabase";
 import RepositoryList from "../../components/repositories/RepositoryList.astro"
 
@@ -29,8 +28,8 @@ async function fetchUserRepositories(username, token) {
 }
 
 // Example usage
-const username = 'norMNfan';
-const token = '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';
+const username = import.meta.env.GITHUB_USERNAME;
+const token = import.meta.env.GITHUB_TOKEN;
 
 const repositories = fetchUserRepositories(username, token)
   .then(repos => {
@@ -46,8 +45,13 @@ const repositories = fetchUserRepositories(username, token)
   description='description'
   pageTitle='Repositories'
 >
+  <!-- <button 
+    type="submit" 
+    className="border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0)] dark:hover:shadow-[1px_1px_0px_0px_rgba(255,255,255)] transition-all"
+  >
+    Analyze
+  </button> -->
   <main class='bg-white p-6 space-y-4'>
-    <Button href={`/switches/create_switch`} color="green">Fix Bugs (TODO)</Button>
     <RepositoryList repositories={repositories} />
   </main>
 </Layout>
