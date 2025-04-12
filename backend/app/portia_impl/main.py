@@ -9,11 +9,12 @@ from portia import (
     Portia,
     PortiaToolRegistry,
     StorageClass,
+    PlanRunState,
     example_tool_registry
 )
 from portia.storage import PortiaCloudStorage
-from .github_actions import *
-from .aws_actions import *
+from github_actions import *
+from aws_actions import *
 
 github_tools = InMemoryToolRegistry.from_local_tools([
     # InitializeGitHubClient(),
@@ -24,6 +25,7 @@ github_tools = InMemoryToolRegistry.from_local_tools([
     CreateGitHubIssue(),
     GitHubAddCommitFile(),
     CreateGitHubPullRequest(),
+    OnErrorLogFoundHumanDecisionTool()
 ])
 
 aws_tools = InMemoryToolRegistry.from_local_tools([
@@ -46,7 +48,6 @@ anthropic_config = Config.from_default(
 )
 
 def instantiate_portia():
-    # TODO: Pass tool registry
     portia = Portia(config=anthropic_config, tools=github_tools + aws_tools)
     return portia
 
@@ -93,13 +94,14 @@ def create_plan():
         2. then select the first log group
         3. then list all the log streams for that group
         4. then listen for error logs in that most recent stream
-        5. list all the repos under this user: {GITHUB_USERNAME}
-        6. list files under this repo: {REPO_NAME} for owner: {GITHUB_USERNAME}
-        7. from those list of files, select the one that is best associated with the error using the owner and repo info form before
-        8. view the contents of the selected file using the owner and repo information from before
-        9. propose a fix for this error given the contents of the file from before, and output a diff of the solution and the existing content
-        10. Create an issue in Github with the proposed changes using Github credentials from before
-        11. In the final output, format the before and after diff using markdown
+        5. if there are any error logs, as in the list is not empty, ask the user on how to handle this via either creating a PR or an ISSUE using the on_error_log_human_decision tool
+        6. list all the repos under this user: {GITHUB_USERNAME}
+        7. list files under this repo: {REPO_NAME} for owner: {GITHUB_USERNAME}
+        8. from those list of files, select the one that is best associated with the error using the owner and repo info form before
+        9. view the contents of the selected file using the owner and repo information from before
+        10. propose a fix for this error given the contents of the file from before, and output a diff of the solution and the existing content
+        11. Create an issue in Github with the proposed changes using Github credentials from before
+        12. In the final output, format the before and after diff using markdown
         """.format(GITHUB_USERNAME=GITHUB_USERNAME, REPO_NAME=REPO_NAME)
 
     plan = portia.plan(query)
@@ -114,14 +116,33 @@ def run_plan(plan_id: str):
     plan = my_store.get_plan(plan_id)
 
     run = portia.run_plan(plan)
-    print(run.model_dump_json(indent=2))
+    # print(run.model_dump_json(indent=2))
     
-    return run.model_dump_json(indent=2)
+    # return run.model_dump_json(indent=2)
+    return run.outputs.clarifications[0]
 
 
+def resume_run(plan_run_id:str, user_input:str):
+    portia = instantiate_portia()
 
+    my_store = PortiaCloudStorage(config=anthropic_config)
 
+    plan_run = my_store.get_plan_run(plan_run_id)
+    plan = my_store.get_plan(plan_run.plan_id)
+
+    resumed_plan_run = portia.resume(plan_run, plan_run_id)
+
+    while resumed_plan_run.state == PlanRunState.NEED_CLARIFICATION:
+        for clarification in plan_run.get_outstanding_clarifications():
+            print(clarification)
+
+    return resumed_plan_run
 
 
 if __name__ == "__main__":
-    create_plan()
+    plan = create_plan()
+    plan_id = plan.id
+
+    plan_start = run_plan(plan_id)
+
+    print(plan_start)

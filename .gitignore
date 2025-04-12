@@ -12,3 +12,4 @@
 /frontend/.env
 /backend/app/portia/.env
 *.env
+.env
