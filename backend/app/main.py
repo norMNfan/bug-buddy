@@ -24,4 +24,4 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(switches.router, prefix="/switches", tags=["switches"])
+app.include_router(switches.router, prefix="/repos", tags=["repos"])

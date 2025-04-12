@@ -12,3 +12,11 @@ class Switch(Base):
     interval = Column(Integer)
     expiration_datetime = Column(DateTime)
     is_active = Column(Boolean)
+
+
+class Repo(Base):
+    __tablename__ = "repos"
+
+    username = Column(String)
+    id = Column(String, primary_key=True)
+    full_name = Column(String)

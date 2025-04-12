@@ -2,6 +2,7 @@
 import Layout from '@layouts/Default.astro';
 import { supabase } from "../../lib/supabase";
 import RepositoryList from "../../components/repositories/RepositoryList.astro"
+import { record } from 'astro:schema';
 
 
 // Get user session
@@ -24,20 +25,67 @@ async function fetchUserRepositories(username, token) {
   }
 
   const repositories = await response.json();
+  saveRepos(username, repositories);
   return repositories;
 }
 
-// Example usage
+const saveRepos = async (username, repos) => {  
+  const payload = {
+    repos: repos.map(repo =>({
+      id: String(repo.id),
+      full_name: repo.full_name,
+      username: username,
+    }))
+  }
+
+  const response = await fetch(`${process.env.API_URL}/repos`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  
+  if (!response.ok) {
+    console.error(`Error status: ${response.status}`);
+    console.error(`Error text: ${await response.text()}`);
+    throw new Error(`Failed to fetch repos: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+const getRepos = async (username) => {
+  const response = await fetch(`${process.env.API_URL}/repos`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  console.log(response.json());
+  
+  if (!response.ok) {
+    console.error(`Error status: ${response.status}`);
+    console.error(`Error text: ${await response.text()}`);
+    throw new Error(`Failed to fetch repos: ${response.statusText}`);
+  }
+
+  return response;
+};
+
 const username = import.meta.env.GITHUB_USERNAME;
 const token = import.meta.env.GITHUB_TOKEN;
 
+
+
 const repositories = fetchUserRepositories(username, token)
   .then(repos => {
-    console.log('User Repositories:', repos);
+    // console.log('User Repositories:', repos);
   })
   .catch(error => {
     console.error('Error:', error);
   });
+
+  const repos = getRepos(username);
 
 ---
 <Layout
@@ -52,6 +100,6 @@ const repositories = fetchUserRepositories(username, token)
     Analyze
   </button> -->
   <main class='bg-white p-6 space-y-4'>
-    <RepositoryList repositories={repositories} />
+    <RepositoryList repos={repos} />
   </main>
 </Layout>
