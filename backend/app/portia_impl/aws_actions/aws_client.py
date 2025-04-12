@@ -19,7 +19,7 @@ class AWSClient:
                                        aws_secret_access_key=secret_key,
                                        region_name=region)
         else:
-            self.client = boto3.client('logs', region_name=region)
+            self.client = boto3.client('logs', region_name="us-east-1")
 
     def list_log_groups(self) -> List[str]:
         try:

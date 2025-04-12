@@ -13,3 +13,4 @@ class Repos(BaseModel):
 class Analysis(BaseModel):
     id: str
     log_group: str
+    output: str

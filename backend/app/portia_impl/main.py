@@ -92,7 +92,9 @@ def whole_flow():
         6. list files under this repo: {REPO_NAME} for owner: {GITHUB_USERNAME}
         7. from those list of files, select the one that is best associated with the error using the owner and repo info form before
         8. view the contents of the selected file using the owner and repo information from before
-        8. propose a fix for this error given the contents of the file from before, and output a diff of the solution and the existing content
+        9. propose a fix for this error given the contents of the file from before, and output a diff of the solution and the existing content
+        10. Create an issue in Github with the proposed changes using Github credentials from before
+        11. In the final output, format the before and after diff using markdown
         """.format(GITHUB_USERNAME=GITHUB_USERNAME, REPO_NAME=REPO_NAME)
 
     list_log_groups_plan = portia.plan(query)
@@ -101,10 +103,12 @@ def whole_flow():
 
     list_log_groups_run = portia.run_plan(list_log_groups_plan)
     print(list_log_groups_run.model_dump_json(indent=2))
+    
+    return list_log_groups_run.model_dump_json(indent=2)
 
 
 def run():
-    whole_flow()
+    return whole_flow()
 
 def notnotnotmain():
     AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")

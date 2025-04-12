@@ -25,7 +25,6 @@ async function fetchRepository() {
 }
 
 const repository = await fetchRepository();
-
 ---
 <Layout
   title='Repository'
@@ -46,6 +45,12 @@ const repository = await fetchRepository();
     </form>
 
     <RepositoryDetailPage repo={repository} />
+
+    <!-- Loading spinner and message (Initially hidden via inline style) -->
+    <div id="loadingMessage" style="display: none;" class="flex items-center gap-2 mt-4">
+      <div class="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-500"></div>
+      <span>Loading...</span>
+    </div>
     
     <!-- Container for displaying the analysis result -->
     <div id="analysisResult" class="mt-4 p-4 bg-gray-100 rounded-md"></div>
@@ -57,6 +62,7 @@ const repository = await fetchRepository();
   const analyzeButton = document.getElementById("analyzeButton");
   const analyzeForm = document.getElementById("analyzeForm");
   const analysisResultContainer = document.getElementById("analysisResult");
+  const loadingMessage = document.getElementById("loadingMessage");
 
   analyzeForm?.addEventListener("submit", async (event) => {
     event.preventDefault(); // Prevent the default form submission
@@ -68,6 +74,9 @@ const repository = await fetchRepository();
       console.log("User canceled the analysis.");
       return; // Exit the function if the user cancels
     }
+
+    // Show the loading message and spinner after the user confirms
+    loadingMessage.style.display = "flex";
 
     try {
       console.log("Analyze function called");
@@ -103,6 +112,9 @@ const repository = await fetchRepository();
         <h2>Error</h2>
         <p>There was an error processing the analysis. Please try again later.</p>
       `;
+    } finally {
+      // Hide the loading message after the function completes
+      loadingMessage.style.display = "none";
     }
   });
 </script>
