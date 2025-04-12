@@ -17,13 +17,13 @@ class InitializeAWSClient(Tool):
     output_schema: tuple[str, str] = ("str", "Success or failure message upon connection attempt")
 
     def run(self, _:ToolRunContext, access_key: str, secret_key: str, region: str = "us-east-1"):
-        self.client = AWSClientManager.initialize(access_key=access_key, secret_key=secret_key, region=region)
+        AWSClientManager.initialize(access_key=access_key, secret_key=secret_key, region=region)
         return f"AWS client initialized for region {region}."
 
 
 class ListLogGroupsSchema(BaseModel):
     """Schema to list CloudWatch log groups."""
-    region: str = Field(..., description="AWS region to fetch log groups from")
+    # region: str = Field(..., description="AWS region to fetch log groups from")
 
 class GetLogStreamSchema(BaseModel):
     """Schema to get log streams from a specified log group."""
@@ -44,7 +44,7 @@ class ListAWSLogGroups(Tool):
     args_schema: type[BaseModel] = ListLogGroupsSchema  # Define the schema for this tool
     output_schema: tuple[str, str] = ("List", "Return list of string representing the list of log groups")
 
-    def run(self) -> List[str]:
+    def run(self, _:ToolRunContext) -> List[str]:
         client = AWSClientManager.get_client()
         return client.list_log_groups()
 

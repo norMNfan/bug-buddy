@@ -13,7 +13,7 @@ from .github_actions import *
 from .aws_actions import *
 
 github_tools = InMemoryToolRegistry.from_local_tools([
-    InitializeGitHubClient(),
+    # InitializeGitHubClient(),
     ListGitHubRepos(),
     ListGitHubRepoFiles(),
     ReadGitHubFile(),
@@ -24,7 +24,7 @@ github_tools = InMemoryToolRegistry.from_local_tools([
 ])
 
 aws_tools = InMemoryToolRegistry.from_local_tools([
-    InitializeAWSClient(),
+    # InitializeAWSClient(),
     ListAWSLogGroups(),
     GetMostRecentLogStream(),
     ListenForErrorLogs()
@@ -47,18 +47,102 @@ def instantiate_portia():
     return portia
 
 
+def initialise_github():
+    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+    GITHUB_USERNAME = os.getenv('GITHUB_USERNAME')
+
+    ctx = {}  
+    initialize_tool = InitializeGitHubClient()
+    print("Initializing GitHub Client...")
+    print(initialize_tool.run(ctx, token=GITHUB_TOKEN, username=GITHUB_USERNAME))
+
+def initialise_aws():
+    AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
+    AWS_SECRET = os.getenv("AWS_SECRET")
+    AWS_REGION = os.getenv("AWS_REGION")
+
+    print(f"ACCESS KEY: {AWS_ACCESS_KEY}")
+    print(f"SECRET: {AWS_SECRET}")
+    print(f"REGION: {AWS_REGION}")
+
+    ctx = {}  
+    initialize_tool = InitializeAWSClient()
+
+    print(initialize_tool.run(ctx, access_key=AWS_ACCESS_KEY, secret_key=AWS_SECRET, region=AWS_REGION))
+
+def whole_flow():
+    initialise_github()
+
+    initialise_aws()
+
+    portia = instantiate_portia()
+
+    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+    GITHUB_USERNAME = os.getenv('GITHUB_USERNAME')
+
+    REPO_NAME = os.getenv('GITHUB_REPO')
 
 
-def execute_query(portia_instance, query: str):
-    plan_run = portia_instance.run(ctx, query)
-    return plan_run
+    query = """
+1. List the log groups
+        2. then select the first log group
+        3. then list all the log streams for that group
+        4. then listen for error logs in that most recent stream
+        5. list all the repos under this user: {GITHUB_USERNAME}
+        6. list files under this repo: {REPO_NAME} for owner: {GITHUB_USERNAME}
+        7. from those list of files, select the one that is best associated with the error using the owner and repo info form before
+        8. view the contents of the selected file using the owner and repo information from before
+        8. propose a fix for this error given the contents of the file from before, and output a diff of the solution and the existing content
+        """.format(GITHUB_USERNAME=GITHUB_USERNAME, REPO_NAME=REPO_NAME)
+
+    list_log_groups_plan = portia.plan(query)
+
+    print(list_log_groups_plan.pretty_print())
+
+    list_log_groups_run = portia.run_plan(list_log_groups_plan)
+    print(list_log_groups_run.model_dump_json(indent=2))
+
+
+def main():
+    whole_flow()
+
+def notnotnotmain():
+    AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
+    AWS_SECRET = os.getenv("AWS_SECRET")
+    AWS_REGION = os.getenv("AWS_REGION")
+
+    print(f"ACCESS KEY: {AWS_ACCESS_KEY}")
+    print(f"SECRET: {AWS_SECRET}")
+    print(f"REGION: {AWS_REGION}")
+
+    portia = instantiate_portia()
+    ctx = {}  
+    initialize_tool = InitializeAWSClient()
+
+    print(initialize_tool.run(ctx, access_key=AWS_ACCESS_KEY, secret_key=AWS_SECRET, region=AWS_REGION))
+
+    list_log_groups_tool = ListAWSLogGroups()
+    print(f"\n Listing log groups for {AWS_REGION}")
+    log_groups = list_log_groups_tool.run(ctx)
+    print(log_groups)
+
+    most_recent_log_stream_tool = GetMostRecentLogStream()
+    print(f"\n Getting recent log stream for group {log_groups[0]}")
+    log_stream = most_recent_log_stream_tool.run(ctx, log_group_name=log_groups[0])
+    print(log_stream)
+
+    listen_for_error_logs_tool = ListenForErrorLogs()
+    print(f"\n Listening for error logs for group: {log_groups[0]} and stream: {log_stream}")
+    error_logs = listen_for_error_logs_tool.run(ctx, log_group_name=log_groups[0], log_stream_name=log_stream)
+    print(error_logs)
 
 
 
-def run():
+
+def notmain():
     # === SET THESE VALUES ===
-    GITHUB_TOKEN = "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"
-    GITHUB_USERNAME = "williamdarkocode"
+    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+    GITHUB_USERNAME = os.getenv('williamdarkocode')
 
     # === Example values for testing ===
     REPO_NAME = "go-shopify-williamdarkocode"
@@ -109,26 +193,28 @@ def run():
     #     body=ISSUE_BODY
     # ))
 
-    print("\nAdding and committing file:")
-    print(commit_tool.run(ctx, 
-        owner=GITHUB_USERNAME,
-        repo=REPO_NAME,
-        path=NEW_FILE_PATH,
-        content=NEW_FILE_CONTENT,
-        message=f"NEWWW {COMMIT_MESSAGE}",
-        branch=HEAD_BRANCH,
-        base_branch=BASE_BRANCH
-    ))
+    # print("\nAdding and committing file:")
+    # print(commit_tool.run(ctx, 
+    #     owner=GITHUB_USERNAME,
+    #     repo=REPO_NAME,
+    #     path=NEW_FILE_PATH,
+    #     content=NEW_FILE_CONTENT,
+    #     message=f"NEWWW {COMMIT_MESSAGE}",
+    #     branch=HEAD_BRANCH,
+    #     base_branch=BASE_BRANCH
+    # ))
 
-    print("\nCreating pull request:")
-    print(pr_tool.run(ctx, 
-        owner=GITHUB_USERNAME,
-        repo=REPO_NAME,
-        head_branch=HEAD_BRANCH,
-        base_branch=BASE_BRANCH,
-        title=PULL_REQUEST_TITLE,
-        body=PULL_REQUEST_BODY
-    ))
+    # print("\nCreating pull request:")
+    # print(pr_tool.run(ctx, 
+    #     owner=GITHUB_USERNAME,
+    #     repo=REPO_NAME,
+    #     head_branch=HEAD_BRANCH,
+    #     base_branch=BASE_BRANCH,
+    #     title=PULL_REQUEST_TITLE,
+    #     body=PULL_REQUEST_BODY
+    # ))
+
+
 
 
 if __name__ == "__main__":

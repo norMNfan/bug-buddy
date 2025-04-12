@@ -50,6 +50,7 @@ class GitHubClient:
         """
         Get file metadata and content.
         """
+        owner = owner or self.username
         url = f"{self.base_url}/repos/{owner}/{repo}/contents/{path}"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
@@ -66,6 +67,7 @@ class GitHubClient:
         """
         Create an issue on a repository.
         """
+        owner = owner or self.username
         url = f"{self.base_url}/repos/{owner}/{repo}/issues"
         payload = {"title": title, "body": body}
         response = requests.post(url, headers=self.headers, json=payload)
@@ -76,6 +78,7 @@ class GitHubClient:
         """
         Add or update a file and commit it to a repository.
         """
+        owner = owner or self.username
         branch_url = f"{self.base_url}/repos/{owner}/{repo}/git/ref/heads/{branch}"
         branch_response = requests.get(branch_url, headers=self.headers)
 
@@ -124,6 +127,7 @@ class GitHubClient:
         """
         Create a pull request from head_branch to base_branch.
         """
+        owner = owner or self.username
         url = f"{self.base_url}/repos/{owner}/{repo}/pulls"
         payload = {
             "title": title,
