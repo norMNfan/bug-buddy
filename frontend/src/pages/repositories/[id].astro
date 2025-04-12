@@ -61,6 +61,14 @@ const repository = await fetchRepository();
   analyzeForm?.addEventListener("submit", async (event) => {
     event.preventDefault(); // Prevent the default form submission
 
+    // Prompt the user with a confirmation dialog
+    const proceed = window.confirm("Do you want to proceed with the analysis?");
+
+    if (!proceed) {
+      console.log("User canceled the analysis.");
+      return; // Exit the function if the user cancels
+    }
+
     try {
       console.log("Analyze function called");
       

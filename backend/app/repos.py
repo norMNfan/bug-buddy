@@ -11,7 +11,7 @@ from .models import Repo as RepoModel
 
 # from portia.main_module import main as ai_agent
 
-from .portia.main import main as ai_agent
+from .portia_impl import run as ai_agent
 
 router = APIRouter()
 

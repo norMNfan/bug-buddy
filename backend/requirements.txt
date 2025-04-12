@@ -14,3 +14,7 @@ redis
 flower
 celery[redis]
 sqlalchemy-celery-beat
+dotenv
+portia-sdk-python
+boto3
+requests

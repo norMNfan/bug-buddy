@@ -9,8 +9,8 @@ from portia import (
     PortiaToolRegistry,
     example_tool_registry
 )
-from github_actions import *
-from aws_actions import *
+from .github_actions import *
+from .aws_actions import *
 
 github_tools = InMemoryToolRegistry.from_local_tools([
     InitializeGitHubClient(),
@@ -55,7 +55,7 @@ def execute_query(portia_instance, query: str):
 
 
 
-def main():
+def run():
     # === SET THESE VALUES ===
     GITHUB_TOKEN = "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"
     GITHUB_USERNAME = "williamdarkocode"
@@ -132,4 +132,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run()
