@@ -1,13 +1,16 @@
+import time
+import requests
+import os
 import re
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from functools import wraps
 import asyncio
 
 from .database import get_db
-from .schemas import CreatePlanResponse, RunPlanResponse, Repo, Repos
+from .schemas import CreatePlanResponse, RunPlanResponse, PlanStatusResponse, Repo, Repos
 from .models import Repo as RepoModel
 
 from .portia_impl import create_plan, run_plan
@@ -69,14 +72,9 @@ def log_operation(func):
 # TODO - Implement AI Agent
 @router.post("/createplan", response_model=CreatePlanResponse)
 @log_operation
-async def analyze(request: CreatePlanRequest, db: Session = Depends(get_db)):
-    repo_name_to_log_group_map = {
-        "norMNfan/hello-aws": "/aws/lambda/sam-app-HelloWorldFunction-4ifWr8G1aiJP"
-    }
-
-    log_group = repo_name_to_log_group_map[request.full_name]
-
+async def analyze(request: CreatePlanRequest):
     plan = create_plan()
+    print(plan)
 
     match = re.search(r"UUID\('([a-f0-9\-]{36})'\)", str(plan))
     plan_id = "plan-" + match.group(1)
@@ -90,7 +88,7 @@ async def analyze(request: CreatePlanRequest, db: Session = Depends(get_db)):
 
 @router.post("/runplan", response_model=CreatePlanResponse)
 @log_operation
-async def analyze(request: RunPlanRequest, db: Session = Depends(get_db)):
+async def analyze(request: RunPlanRequest):
     plan_id = request.plan_id
 
     plan_result = run_plan(plan_id)
@@ -100,6 +98,35 @@ async def analyze(request: RunPlanRequest, db: Session = Depends(get_db)):
     )
 
     return response
+
+
+@router.get("/getplanstatus/{plan_id}", response_model=PlanStatusResponse)
+@log_operation
+def get_plan_status(plan_id: str):
+    
+    try:
+        # Use environment variable or securely stored key
+        api_key = os.getenv("PORTIA_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Portia API key not configured")
+
+        portia_url = f"https://api.portialabs.ai/api/v0/plans/{plan_id}"
+
+        headers = {
+            "Authorization": f"Api-Key {api_key}",
+            "Accept": "application/json",
+        }
+
+        time.sleep(10)
+        response = requests.get(portia_url, headers=headers)
+        print(f"Porta get plan status response: {response['steps']}")
+
+        res = PlanStatusResponse(output=str(response['steps']))
+
+        return res
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 #########

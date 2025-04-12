@@ -13,6 +13,10 @@ class Repos(BaseModel):
 
 class CreatePlanResponse(BaseModel):
     plan_id: str
+    
 
 class RunPlanResponse(BaseModel):
+    output: str
+
+class PlanStatusResponse(BaseModel):
     output: str

@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 
 const { id } = Astro.params;
 const token = import.meta.env.GITHUB_TOKEN;
+const PORTIA_API_KEY = import.meta.env.PORTIA_API_KEY;
 
 async function fetchRepository() {
   const url = `https://api.github.com/repositories/${id}`;
@@ -31,31 +32,110 @@ const repository = await fetchRepository();
   description='description'
   pageTitle='Repository'
 >
-<main class="flex-1 flex flex-col gap-4 items-center p-4 justify-center">
-  <section class="w-full max-w-md">
-    <form id="analyzeForm" onSubmit={(event) => event.preventDefault()}>
+<main class="flex-1 flex flex-col gap-6 items-center p-6 justify-center bg-gray-50">
+  <section class="w-full max-w-lg bg-white p-6 rounded-lg shadow-lg">
+    <!-- Form Section -->
+    <form id="analyzeForm" onSubmit={(event) => event.preventDefault()} class="space-y-4">
+      <h2 class="text-xl font-semibold text-center">Fix Bugs</h2>
       <Button
         id="analyzeButton"
         type="submit"
         variant="contained"
         color="primary"
+        fullWidth
+        class="py-2 text-lg"
       >
-        Fix Bugs
+        Start Analysis
       </Button>
     </form>
 
-    <RepositoryDetailPage repo={repository} />
-
-    <!-- Loading spinner and message (Initially hidden via inline style) -->
-    <div id="loadingMessage" style="display: none;" class="flex items-center gap-2 mt-4">
-      <div class="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-500"></div>
-      <span>Loading...</span>
+    <!-- Repository Details Section -->
+    <div class="mt-6">
+      <div class="bg-gray-50 p-4 rounded-md shadow-sm">
+        <h3 class="text-lg font-semibold mb-2">Repository Details</h3>
+        <p class="text-sm font-medium text-gray-600">ID: <span class="text-blue-600">{repository.id}</span></p>
+        <p class="text-sm font-medium text-gray-600">Name: <span class="text-blue-600">{repository.full_name}</span></p>
+      </div>
     </div>
     
-    <!-- Container for displaying the analysis result -->
-    <div id="analysisResult" class="mt-4 p-4 bg-gray-100 rounded-md"></div>
+    <!-- Analysis Result Container -->
+    <div id="analysisResult" class="mt-6 p-4 bg-gray-100 rounded-md shadow-sm hidden"></div>
+
+    <!-- Loading spinner and message -->
+    <div id="loadingMessage" style="display: none;" class="flex items-center gap-2 mt-6 justify-center">
+      <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
+      <span id="loadingText" class="text-lg">Creating Plan...</span>
+    </div>
   </section>
 </main>
+
+<style>
+  /* Improved styling for better user experience */
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9fafb;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .bg-gray-50 {
+    background-color: #f9fafb;
+  }
+
+  .bg-gray-100 {
+    background-color: #f3f4f6;
+  }
+
+  .text-blue-600 {
+    color: #2563eb;
+  }
+  
+  .text-lg {
+    font-size: 1.125rem;
+  }
+
+  .text-sm {
+    font-size: 0.875rem;
+  }
+
+  .font-semibold {
+    font-weight: 600;
+  }
+
+  .font-medium {
+    font-weight: 500;
+  }
+
+  .rounded-md {
+    border-radius: 0.375rem;
+  }
+
+  .shadow-lg {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-sm {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+
+  /* Added to override the hidden class */
+  .show {
+    display: block !important;
+  }
+</style>
 
 <script type="module">
   // Ensure this code runs on the client-side
@@ -75,8 +155,17 @@ const repository = await fetchRepository();
       return; // Exit the function if the user cancels
     }
 
+    // Get reference to the loading text element
+    const loadingText = document.getElementById("loadingText");
+    
+    // Set initial loading message
+    loadingText.textContent = "Creating Plan...";
+    
     // Show the loading message and spinner after the user confirms
     loadingMessage.style.display = "flex";
+    
+    // Clear previous results
+    analysisResultContainer.innerHTML = "";
 
     try {
       console.log("Create Plan function called");
@@ -96,50 +185,30 @@ const repository = await fetchRepository();
       });
 
       if (!createPlanResponse.ok) {
-        throw new Error(`Error analyzing repositories: ${analyzeResponse.statusText}`);
+        throw new Error(`Error creating plan: ${createPlanResponse.statusText}`);
       }
 
       const createPlanResult = await createPlanResponse.json();
       const planId = createPlanResult.plan_id;
 
-      console.log("Create plan success:", createPlanResult);
+      console.log("plan_id:", planId);
 
+      // Make sure the result container is visible by removing the hidden class
+      analysisResultContainer.classList.remove("hidden");
+
+      // Show the Plan ID in the UI
       analysisResultContainer.innerHTML = `
         <h2>Plan Created</h2>
         <p><strong>Plan ID:</strong> ${planId}</p>
       `;
 
-      /////////////////////
-      // GET PLAN STATUS //
-      /////////////////////
-      console.log("Fetching plan from PortiaLabs API...");
-      const portiaResponse = await fetch(`https://api.portialabs.ai/api/v0/plan-runs/${planId}/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Api-Key prt-kswmXP7S.zNgfdbSGUg3IHeZKkvQzb9xFX2vMv3ei'
-        },
-      });
-
-      if (!portiaResponse.ok) {
-        throw new Error(`PortiaLabs API failed: ${portiaResponse.statusText}`);
-      }
-
-      const portiaResult = await portiaResponse.json();
-      console.log("Portia result success:", portiaResult);
-
-      analysisResultContainer.innerHTML = `
-        <h2>Plan Analysis</h2>
-        <p><strong>Plan ID:</strong> ${planId}</p>
-        <h3>PortiaLabs API Result:</h3>
-        <pre>${JSON.stringify(portiaResult, null, 2)}</pre>
-      `;
-
-
       //////////////
       // RUN PLAN //
       //////////////
 
+      // Update loading message for running plan
+      loadingText.textContent = "Running Plan...";
+      
       // Save and use the output value to call /repos/runplan
       console.log("Step 2: Running plan with plan ID:", planId);
 
@@ -158,18 +227,25 @@ const repository = await fetchRepository();
       const runPlanResult = await runPlanResponse.json();
       console.log("Run plan success:", runPlanResult);
 
+      // Make sure the result container is visible
+      analysisResultContainer.classList.remove("hidden");
+
       // Display the analysis result in the page
       analysisResultContainer.innerHTML = `
         <h2>Analysis Result</h2>
-        <pre>${JSON.stringify(createPlanResult, null, 2)}</pre>
+        <pre>${JSON.stringify(runPlanResult, null, 2)}</pre>
       `;
     } catch (error) {
       console.error("Error during analysis:", error);
+
+      // Make sure the result container is visible
+      analysisResultContainer.classList.remove("hidden");
 
       // Display error message in the page
       analysisResultContainer.innerHTML = `
         <h2>Error</h2>
         <p>There was an error processing the analysis. Please try again later.</p>
+        <p>Error details: ${error.message}</p>
       `;
     } finally {
       // Hide the loading message after the function completes
@@ -177,4 +253,3 @@ const repository = await fetchRepository();
     }
   });
 </script>
-</Layout>

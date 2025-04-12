@@ -7,6 +7,7 @@ from portia import (
     LLMProvider,
     Plan,
     Portia,
+    StorageClass
     PortiaToolRegistry,
     StorageClass,
     PlanRunState,
