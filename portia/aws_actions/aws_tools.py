@@ -1,7 +1,7 @@
 from typing import List
 from portia.tool import Tool
 from pydantic import BaseModel, Field
-from aws_client import AWSClient
+from .aws_client import AWSClient
 
 
 class InitAWSClientSchema(BaseModel):

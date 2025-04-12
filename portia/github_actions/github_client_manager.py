@@ -1,4 +1,4 @@
-from github_client import GitHubClient
+from .github_client import GitHubClient
 
 class GitHubClientManager:
     _client: GitHubClient = None
