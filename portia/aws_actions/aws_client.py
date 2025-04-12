@@ -1,8 +1,9 @@
 import boto3
 import time
 import json
-from typing import List
+from typing import List, Optional
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+from threading import Lock
 
 class AWSClient:
     def __init__(self, access_key: str = None, secret_key: str = None, region: str = "us-east-1"):
@@ -70,3 +71,22 @@ class AWSClient:
         except Exception as e:
             raise RuntimeError(f"Error listening for error logs: {e}")
 
+class AWSClientManager:
+    _client: Optional[AWSClient] = None
+    _lock = Lock()
+
+    @classmethod
+    def initialize(cls, access_key: str = None, secret_key: str = None, region: str = "us-east-1") -> None:
+        with cls._lock:
+            cls._client = AWSClient(access_key, secret_key, region)
+
+    @classmethod
+    def get_client(cls) -> AWSClient:
+        if cls._client is None:
+            raise RuntimeError("AWS client has not been initialized. Call initialize() first.")
+        return cls._client
+
+    @classmethod
+    def reset(cls) -> None:
+        with cls._lock:
+            cls._client = None

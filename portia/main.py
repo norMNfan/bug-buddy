@@ -50,7 +50,7 @@ def instantiate_portia():
 
 
 def execute_query(portia_instance, query: str):
-    plan_run = portia_instance.run(query)
+    plan_run = portia_instance.run(ctx, query)
     return plan_run
 
 
@@ -75,9 +75,10 @@ def main():
 
     # === Initialize Portia and GitHub Client ===
     portia = instantiate_portia()
+    ctx = {}  
     initialize_tool = InitializeGitHubClient()
     print("Initializing GitHub Client...")
-    print(initialize_tool.run(token=GITHUB_TOKEN, username=GITHUB_USERNAME))
+    print(initialize_tool.run(ctx, token=GITHUB_TOKEN, username=GITHUB_USERNAME))
 
     # === Tool Instances ===
     list_repos_tool = ListGitHubRepos()
@@ -89,19 +90,19 @@ def main():
     pr_tool = CreateGitHubPullRequest()
 
     print("\nListing repositories:")
-    print(list_repos_tool.run(user=GITHUB_USERNAME))
+    print(list_repos_tool.run(ctx, user=GITHUB_USERNAME))
 
     print("\nListing files in repo:")
-    print(list_files_tool.run(owner=GITHUB_USERNAME, repo=REPO_NAME, path=""))
+    print(list_files_tool.run(ctx, owner=GITHUB_USERNAME, repo=REPO_NAME, path=""))
 
     print("\nReading file from repo:")
-    print(read_file_tool.run(owner=GITHUB_USERNAME, repo=REPO_NAME, path=FILE_PATH))
+    print(read_file_tool.run(ctx, owner=GITHUB_USERNAME, repo=REPO_NAME, path=FILE_PATH))
 
     print("\nGetting file with metadata:")
-    print(metadata_tool.run(owner=GITHUB_USERNAME, repo=REPO_NAME, path=FILE_PATH))
+    print(metadata_tool.run(ctx, owner=GITHUB_USERNAME, repo=REPO_NAME, path=FILE_PATH))
 
     print("\nCreating GitHub issue:")
-    print(create_issue_tool.run(
+    print(create_issue_tool.run(ctx, 
         owner=GITHUB_USERNAME,
         repo=REPO_NAME,
         title=ISSUE_TITLE,
@@ -109,7 +110,7 @@ def main():
     ))
 
     print("\nAdding and committing file:")
-    print(commit_tool.run(
+    print(commit_tool.run(ctx, 
         owner=GITHUB_USERNAME,
         repo=REPO_NAME,
         path=NEW_FILE_PATH,
@@ -119,7 +120,7 @@ def main():
     ))
 
     print("\nCreating pull request:")
-    print(pr_tool.run(
+    print(pr_tool.run(ctx, 
         owner=GITHUB_USERNAME,
         repo=REPO_NAME,
         head_branch=HEAD_BRANCH,

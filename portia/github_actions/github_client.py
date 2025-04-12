@@ -15,6 +15,7 @@ class GitHubClient:
             "Accept": "application/vnd.github.v3+json"
         }
         self.username = username
+        self.token = token
 
     def list_repositories(self, user=None):
         """
