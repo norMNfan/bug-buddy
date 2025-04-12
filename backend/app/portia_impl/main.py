@@ -14,8 +14,8 @@ from portia import (
     example_tool_registry
 )
 from portia.storage import PortiaCloudStorage
-from .github_actions import *
-from .aws_actions import *
+from github_actions import *
+from aws_actions import *
 
 github_tools = InMemoryToolRegistry.from_local_tools([
     # InitializeGitHubClient(),
@@ -137,12 +137,12 @@ def resume_run(plan_run_id:str, user_input:str):
 
     while plan_run.state == PlanRunState.NEED_CLARIFICATION:
         for clarification in plan_run.get_outstanding_clarifications():
-            resumed_plan_run = portia.resolve_clarification(clarification, user_input, plan_run)
+            plan_run = portia.resolve_clarification(clarification, user_input, plan_run)
 
-        resumed_plan_run = portia.resume(plan_run, resumed_plan_run.id)
+        plan_run = portia.resume(plan_run, plan_run.id)
         # portia.run
     
-    return resumed_plan_run
+    return plan_run
 
 
 if __name__ == "__main__":

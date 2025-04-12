@@ -8,32 +8,27 @@ class ListReposSchema(BaseModel):
 
 
 class ListFilesSchema(BaseModel):
-    owner: str = Field(..., description="GitHub organization or username")
     repo: str = Field(..., description="Repository name")
     path: str = Field("", description="Path within the repository to list files from")
 
 
 class ReadFileSchema(BaseModel):
-    owner: str = Field(..., description="GitHub organization or username")
     repo: str = Field(..., description="Repository name")
     path: str = Field(..., description="Path of the file to read")
 
 
 class FileWithMetadataSchema(BaseModel):
-    owner: str = Field(..., description="GitHub organization or username")
     repo: str = Field(..., description="Repository name")
     path: str = Field(..., description="Path of the file to retrieve with metadata")
 
 
 class CreateIssueSchema(BaseModel):
-    owner: str = Field(..., description="GitHub organization or username")
     repo: str = Field(..., description="Repository name")
     title: str = Field(..., description="Title of the issue")
     body: str = Field("", description="Body or description of the issue")
 
 
 class AddCommitFileSchema(BaseModel):
-    owner: str = Field(..., description="GitHub organization or username")
     repo: str = Field(..., description="Repository name")
     path: str = Field(..., description="Path of the file in the repo")
     content: str = Field(..., description="The file content to add or update")
@@ -43,7 +38,6 @@ class AddCommitFileSchema(BaseModel):
 
 
 class PullRequestSchema(BaseModel):
-    owner: str = Field(..., description="GitHub organization or username")
     repo: str = Field(..., description="Repository name")
     head_branch: str = Field(..., description="Source branch (the one with changes)")
     base_branch: str = Field(..., description="Destination branch (usually 'main')")
@@ -139,10 +133,10 @@ class ListGitHubRepoFiles(Tool):
     args_schema: type[BaseModel] = ListFilesSchema
     output_schema: tuple[str, str] = ("List", "List files in a repository at a given path")
 
-    def run(self, _:ToolRunContext, owner: str, repo: str, path: str = "") -> Any:
+    def run(self, _:ToolRunContext, repo: str, path: str = "") -> Any:
         client = GitHubClientManager.get_client()
 
-        return client.list_files(owner, repo, path)
+        return client.list_files(client.username, repo, path)
 
 
 # 3. Read File Content
@@ -153,10 +147,10 @@ class ReadGitHubFile(Tool):
     args_schema: type[BaseModel] = ReadFileSchema
     output_schema: tuple[str, str] = ("str", "Read a file's content from a repository")
 
-    def run(self, _:ToolRunContext, owner: str, repo: str, path: str) -> Any:
+    def run(self, _:ToolRunContext, repo: str, path: str) -> Any:
         client = GitHubClientManager.get_client()
 
-        return client.read_file(owner, repo, path)
+        return client.read_file(client.username, repo, path)
 
 
 # 4. File with Metadata
@@ -167,10 +161,10 @@ class GetGitHubFileWithMetadata(Tool):
     args_schema: type[BaseModel] = FileWithMetadataSchema
     output_schema: tuple[str, str] = ("dict", "Get file metadata and content as a dict")
 
-    def run(self, _:ToolRunContext, owner: str, repo: str, path: str) -> Any:
+    def run(self, _:ToolRunContext, repo: str, path: str) -> Any:
         client = GitHubClientManager.get_client()
 
-        return client.get_file_metadata_and_content(owner, repo, path)
+        return client.get_file_metadata_and_content(client.username, repo, path)
 
 
 # 5. Create Issue (auth)
@@ -181,12 +175,12 @@ class CreateGitHubIssue(Tool):
     args_schema: type[BaseModel] = CreateIssueSchema
     output_schema: tuple[str, str] = ("any", "Create an issue on a repository")
 
-    def run(self, _:ToolRunContext, owner: str, repo: str, title: str, body: str) -> Any:
+    def run(self, _:ToolRunContext, repo: str, title: str, body: str) -> Any:
         client = GitHubClientManager.get_client()
 
         token = client.token
         # return client.create_issue(token, owner, repo, title, body)
-        return client.create_issue(owner, repo, title, body)
+        return client.create_issue(client.username, repo, title, body)
 
 
 # 6. Add & Commit File (auth)
@@ -197,11 +191,11 @@ class GitHubAddCommitFile(Tool):
     args_schema: type[BaseModel] = AddCommitFileSchema
     output_schema: tuple[str, str] = ("any", "Add or update a file and commit it to a repository")
 
-    def run(self, _:ToolRunContext, owner: str, repo: str, path: str, content: str, message: str, branch: str = "main", base_branch: str = "main") -> Any:
+    def run(self, _:ToolRunContext, repo: str, path: str, content: str, message: str, branch: str = "main", base_branch: str = "main") -> Any:
         client = GitHubClientManager.get_client()
 
         token = client.token
-        return client.add_and_commit_file(owner, repo, path, content, message, branch, base_branch)
+        return client.add_and_commit_file(client.username, repo, path, content, message, branch, base_branch)
 
 
 # 7. Create Pull Request (auth)
@@ -212,8 +206,8 @@ class CreateGitHubPullRequest(Tool):
     args_schema: type[BaseModel] = PullRequestSchema
     output_schema: tuple[str, str] = ("any", "Create a pull request from head_branch to base_branch")
 
-    def run(self, _:ToolRunContext, owner: str, repo: str, head_branch: str, base_branch: str, title: str, body: str = "") -> Any:
+    def run(self, _:ToolRunContext, repo: str, head_branch: str, base_branch: str, title: str, body: str = "") -> Any:
         client = GitHubClientManager.get_client()
 
         token = client.token
-        return client.create_pull_request(owner, repo, head_branch, base_branch, title, body)
+        return client.create_pull_request(client.username, repo, head_branch, base_branch, title, body)
