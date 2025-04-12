@@ -24,31 +24,6 @@ async function fetchRepository() {
   return await response.json();
 }
 
-
-const analyze = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent the default form submission
-
-    try {
-      console.log("Analyze function called");
-      
-      const analyzeResponse = await fetch('/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!analyzeResponse.ok) {
-        throw new Error(`Error analyzing repositories: ${analyzeResponse.statusText}`);
-      }
-
-      const result = await analyzeResponse.json();
-      console.log("Analysis result:", result);
-    } catch (error) {
-      console.error("Error during analysis:", error);
-    }
-  };
-
 const repository = await fetchRepository();
 
 ---
@@ -57,11 +32,70 @@ const repository = await fetchRepository();
   description='description'
   pageTitle='Repository'
 >
+<main class="flex-1 flex flex-col gap-4 items-center p-4 justify-center">
+  <section class="w-full max-w-md">
+    <form id="analyzeForm" onSubmit={(event) => event.preventDefault()}>
+      <Button
+        id="analyzeButton"
+        type="submit"
+        variant="contained"
+        color="primary"
+      >
+        Analyze Repo
+      </Button>
+    </form>
 
-<form onSubmit={analyze}>
-  <Button type="submit" variant="contained" color="primary">
-    Analyze Repo
-  </Button>
-</form>
-  <RepositoryDetailPage client:load repo={repository} />
+    <RepositoryDetailPage repo={repository} />
+    
+    <!-- Container for displaying the analysis result -->
+    <div id="analysisResult" class="mt-4 p-4 bg-gray-100 rounded-md"></div>
+  </section>
+</main>
+
+<script type="module">
+  // Ensure this code runs on the client-side
+  const analyzeButton = document.getElementById("analyzeButton");
+  const analyzeForm = document.getElementById("analyzeForm");
+  const analysisResultContainer = document.getElementById("analysisResult");
+
+  analyzeForm?.addEventListener("submit", async (event) => {
+    event.preventDefault(); // Prevent the default form submission
+
+    try {
+      console.log("Analyze function called");
+      
+      const analyzeResponse = await fetch('http://localhost:8000/repos/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          "repo_id": "235781423",
+          "full_name": "norMNfan/hello-aws"
+        }),
+      });
+
+      if (!analyzeResponse.ok) {
+        throw new Error(`Error analyzing repositories: ${analyzeResponse.statusText}`);
+      }
+
+      const result = await analyzeResponse.json();
+      console.log("Analysis result:", result);
+
+      // Display the analysis result in the page
+      analysisResultContainer.innerHTML = `
+        <h2>Analysis Result</h2>
+        <pre>${JSON.stringify(result, null, 2)}</pre>
+      `;
+    } catch (error) {
+      console.error("Error during analysis:", error);
+
+      // Display error message in the page
+      analysisResultContainer.innerHTML = `
+        <h2>Error</h2>
+        <p>There was an error processing the analysis. Please try again later.</p>
+      `;
+    }
+  });
+</script>
 </Layout>

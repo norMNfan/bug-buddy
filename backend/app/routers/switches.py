@@ -35,6 +35,12 @@ class AddReposRequest(BaseModel):
     repos: List[AddRepoRequest]
 
 
+class AnalyzeRepoRequest(BaseModel):
+    repo_id: str
+    full_name: str
+
+
+
 def log_operation(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
@@ -56,10 +62,18 @@ def log_operation(func):
 # ANALYZE #
 ###########
 # TODO - Implement AI Agent
-@router.post("/analyze/{repo_id}", response_model=Analysis)
+@router.post("/analyze", response_model=Analysis)
 @log_operation
-async def analyze(repo_id: str, db: Session = Depends(get_db)):
-    return repo_id
+async def analyze(request: AnalyzeRepoRequest, db: Session = Depends(get_db)):
+    repo_name_to_log_group_map = {
+        "norMNfan/hello-aws": "/aws/lambda/sam-app-HelloWorldFunction-4ifWr8G1aiJP"
+    }
+
+    log_group = repo_name_to_log_group_map[request.full_name]
+    
+    response = Analysis(id='1234')
+
+    return response
 
 
 #########
