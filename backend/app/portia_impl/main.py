@@ -103,7 +103,7 @@ def whole_flow():
     print(list_log_groups_run.model_dump_json(indent=2))
 
 
-def main():
+def run():
     whole_flow()
 
 def notnotnotmain():
