@@ -71,7 +71,7 @@ async def analyze(request: AnalyzeRepoRequest, db: Session = Depends(get_db)):
 
     log_group = repo_name_to_log_group_map[request.full_name]
     
-    response = Analysis(id='1234')
+    response = Analysis(id='1234', log_group=log_group)
 
     return response
 
