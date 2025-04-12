@@ -39,6 +39,7 @@ class AddCommitFileSchema(BaseModel):
     content: str = Field(..., description="The file content to add or update")
     message: str = Field(..., description="Commit message")
     branch: str = Field("main", description="Branch to commit to")
+    base_branch: str = Field("main", description="Branch to commit to")
 
 
 class PullRequestSchema(BaseModel):
@@ -151,11 +152,11 @@ class GitHubAddCommitFile(Tool):
     args_schema: type[BaseModel] = AddCommitFileSchema
     output_schema: tuple[str, str] = ("any", "Add or update a file and commit it to a repository")
 
-    def run(self, _:ToolRunContext, owner: str, repo: str, path: str, content: str, message: str, branch: str = "main") -> Any:
+    def run(self, _:ToolRunContext, owner: str, repo: str, path: str, content: str, message: str, branch: str = "main", base_branch: str = "main") -> Any:
         client = GitHubClientManager.get_client()
 
         token = client.token
-        return client.add_and_commit_file(token, owner, repo, path, content, message, branch)
+        return client.add_and_commit_file(owner, repo, path, content, message, branch, base_branch)
 
 
 # 7. Create Pull Request (auth)
@@ -170,4 +171,4 @@ class CreateGitHubPullRequest(Tool):
         client = GitHubClientManager.get_client()
 
         token = client.token
-        return client.create_pull_request(token, owner, repo, head_branch, base_branch, title, body)
+        return client.create_pull_request(owner, repo, head_branch, base_branch, title, body)

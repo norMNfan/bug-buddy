@@ -72,10 +72,33 @@ class GitHubClient:
         response.raise_for_status()
         return response.json()
 
-    def add_and_commit_file(self, owner, repo, path, content, message, branch="main"):
+    def add_and_commit_file(self, owner, repo, path, content, message, branch="main", base_branch="main"):
         """
         Add or update a file and commit it to a repository.
         """
+        branch_url = f"{self.base_url}/repos/{owner}/{repo}/git/ref/heads/{branch}"
+        branch_response = requests.get(branch_url, headers=self.headers)
+
+        if branch_response.status_code == 404:
+            # Step 2: Get the SHA of the base branch
+            base_ref_url = f"{self.base_url}/repos/{owner}/{repo}/git/ref/heads/{base_branch}"
+            base_response = requests.get(base_ref_url, headers=self.headers)
+            base_response.raise_for_status()
+            base_sha = base_response.json()["object"]["sha"]
+
+            # Step 3: Create the new branch from the base branch
+            create_branch_payload = {
+                "ref": f"refs/heads/{branch}",
+                "sha": base_sha
+            }
+
+            create_response = requests.post(
+                f"{self.base_url}/repos/{owner}/{repo}/git/refs",
+                headers=self.headers,
+                json=create_branch_payload
+            )
+            create_response.raise_for_status()
+
         # Check if file exists
         url = f"{self.base_url}/repos/{owner}/{repo}/contents/{path}"
         get_response = requests.get(url, headers=self.headers, params={"ref": branch})

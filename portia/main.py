@@ -89,25 +89,25 @@ def main():
     commit_tool = GitHubAddCommitFile()
     pr_tool = CreateGitHubPullRequest()
 
-    print("\nListing repositories:")
-    print(list_repos_tool.run(ctx, user=GITHUB_USERNAME))
+    # print("\nListing repositories:")
+    # print(list_repos_tool.run(ctx, user=GITHUB_USERNAME))
 
-    print("\nListing files in repo:")
-    print(list_files_tool.run(ctx, owner=GITHUB_USERNAME, repo=REPO_NAME, path=""))
+    # print("\nListing files in repo:")
+    # print(list_files_tool.run(ctx, owner=GITHUB_USERNAME, repo=REPO_NAME, path=""))
 
-    print("\nReading file from repo:")
-    print(read_file_tool.run(ctx, owner=GITHUB_USERNAME, repo=REPO_NAME, path=FILE_PATH))
+    # print("\nReading file from repo:")
+    # print(read_file_tool.run(ctx, owner=GITHUB_USERNAME, repo=REPO_NAME, path=FILE_PATH))
 
-    print("\nGetting file with metadata:")
-    print(metadata_tool.run(ctx, owner=GITHUB_USERNAME, repo=REPO_NAME, path=FILE_PATH))
+    # print("\nGetting file with metadata:")
+    # print(metadata_tool.run(ctx, owner=GITHUB_USERNAME, repo=REPO_NAME, path=FILE_PATH))
 
-    print("\nCreating GitHub issue:")
-    print(create_issue_tool.run(ctx, 
-        owner=GITHUB_USERNAME,
-        repo=REPO_NAME,
-        title=ISSUE_TITLE,
-        body=ISSUE_BODY
-    ))
+    # print("\nCreating GitHub issue:")
+    # print(create_issue_tool.run(ctx, 
+    #     owner=GITHUB_USERNAME,
+    #     repo=REPO_NAME,
+    #     title=ISSUE_TITLE,
+    #     body=ISSUE_BODY
+    # ))
 
     print("\nAdding and committing file:")
     print(commit_tool.run(ctx, 
@@ -115,8 +115,9 @@ def main():
         repo=REPO_NAME,
         path=NEW_FILE_PATH,
         content=NEW_FILE_CONTENT,
-        message=COMMIT_MESSAGE,
-        branch=BASE_BRANCH
+        message=f"NEWWW {COMMIT_MESSAGE}",
+        branch=HEAD_BRANCH,
+        base_branch=BASE_BRANCH
     ))
 
     print("\nCreating pull request:")
