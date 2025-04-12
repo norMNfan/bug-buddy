@@ -10,10 +10,10 @@ from functools import wraps
 import asyncio
 
 from .database import get_db
-from .schemas import CreatePlanResponse, RunPlanResponse, PlanStatusResponse, Repo, Repos
+from .schemas import ContinuePlanResponse, CreatePlanResponse, RunPlanResponse, PlanStatusResponse, Repo, Repos
 from .models import Repo as RepoModel
 
-from .portia_impl import create_plan, run_plan
+from .portia_impl import create_plan, run_plan, resume_run
 
 router = APIRouter()
 
@@ -47,6 +47,10 @@ class CreatePlanRequest(BaseModel):
 class RunPlanRequest(BaseModel):
     plan_id: str
 
+class ContinuePlanRequest(BaseModel):
+    plan_run_id: str
+    option: str
+
 
 
 def log_operation(func):
@@ -72,7 +76,7 @@ def log_operation(func):
 # TODO - Implement AI Agent
 @router.post("/createplan", response_model=CreatePlanResponse)
 @log_operation
-async def analyze(request: CreatePlanRequest):
+async def createplan(request: CreatePlanRequest):
     plan = create_plan()
     print(plan)
 
@@ -88,7 +92,7 @@ async def analyze(request: CreatePlanRequest):
 
 @router.post("/runplan", response_model=RunPlanResponse)
 @log_operation
-async def analyze(request: RunPlanRequest):
+async def runplan(request: RunPlanRequest):
     plan_id = request.plan_id
 
     plan_result = run_plan(plan_id)
@@ -100,6 +104,18 @@ async def analyze(request: RunPlanRequest):
         plan_run_id=plan_run_id,
         user_guidance=plan_result.user_guidance,
         options=plan_result.options
+    )
+
+    return response
+
+
+@router.post("/continueplan", response_model=ContinuePlanResponse)
+@log_operation
+async def continueplan(request: ContinuePlanRequest):
+    res = resume_run(request.plan_run_id, request.option)
+
+    response = ContinuePlanResponse(
+        output=str(res)
     )
 
     return response

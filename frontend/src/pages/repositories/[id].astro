@@ -64,6 +64,24 @@ const repository = await fetchRepository();
     <!-- Run Plan Result Container -->
     <div id="runPlanResult" class="mt-6 p-4 bg-gray-100 rounded-md shadow-sm hidden"></div>
 
+    <!-- Continue Plan Result Container -->
+    <div id="continuePlanResult" class="mt-6 p-4 bg-gray-100 rounded-md shadow-sm hidden">
+      <h3 class="text-lg font-semibold mb-2">Continue Plan Result</h3>
+      <div id="continuePlanContent" class="whitespace-pre-wrap text-sm"></div>
+    </div>
+
+    <!-- Options Container -->
+    <div id="optionsContainer" class="mt-6 hidden">
+      <div class="bg-white p-4 rounded-md shadow-md border border-gray-200">
+        <h3 class="text-lg font-semibold mb-3">Action Required</h3>
+        <div id="userGuidance" class="mb-4 text-sm bg-gray-50 p-3 rounded border-l-4 border-blue-500 whitespace-pre-wrap"></div>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+          <button id="option1Button" class="px-6 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 transition-colors">Option 1</button>
+          <button id="option2Button" class="px-6 py-2 bg-amber-500 text-white font-medium rounded-md hover:bg-amber-600 transition-colors">Option 2</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading spinner and message -->
     <div id="loadingMessage" style="display: none;" class="flex items-center gap-2 mt-6 justify-center">
       <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
@@ -138,6 +156,49 @@ const repository = await fetchRepository();
   .show {
     display: block !important;
   }
+  
+  /* Button styles */
+  .bg-purple-600 {
+    background-color: #9333ea;
+  }
+  
+  .bg-purple-700 {
+    background-color: #7e22ce;
+  }
+  
+  .bg-amber-500 {
+    background-color: #f59e0b;
+  }
+  
+  .bg-amber-600 {
+    background-color: #d97706;
+  }
+  
+  .hover\:bg-purple-700:hover {
+    background-color: #7e22ce;
+  }
+  
+  .hover\:bg-amber-600:hover {
+    background-color: #d97706;
+  }
+  
+  .whitespace-pre-wrap {
+    white-space: pre-wrap;
+  }
+  
+  .transition-colors {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  
+  .border-l-4 {
+    border-left-width: 4px;
+  }
+  
+  .border-blue-500 {
+    border-color: #3b82f6;
+  }
 </style>
 
 <script type="module">
@@ -146,7 +207,73 @@ const repository = await fetchRepository();
   const analyzeForm = document.getElementById("analyzeForm");
   const createPlanResultContainer = document.getElementById("createPlanResult");
   const runPlanResultContainer = document.getElementById("runPlanResult");
+  const continuePlanResultContainer = document.getElementById("continuePlanResult");
+  const continuePlanContent = document.getElementById("continuePlanContent");
+  const optionsContainer = document.getElementById("optionsContainer");
+  const userGuidance = document.getElementById("userGuidance");
+  const option1Button = document.getElementById("option1Button");
+  const option2Button = document.getElementById("option2Button");
   const loadingMessage = document.getElementById("loadingMessage");
+
+  // Function to handle option selection
+  const handleOptionSelection = async (plan_run_id, option) => {
+    console.log(`Selected option: ${option}`);
+    
+    // Update loading message
+    const loadingText = document.getElementById("loadingText");
+    loadingText.textContent = "Processing Your Selection...";
+    loadingMessage.style.display = "flex";
+    
+    try {
+      const continuePlanResponse = await fetch('http://localhost:8000/repos/continueplan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          "plan_run_id": plan_run_id,
+          "option": option
+        }),
+      });
+
+      if (!continuePlanResponse.ok) {
+        throw new Error(`Error continuing plan: ${continuePlanResponse.statusText}`);
+      }
+
+      const continuePlanResult = await continuePlanResponse.json();
+      const output = continuePlanResult.output;
+
+      console.log("Continue plan output:", output);
+
+      // Make sure the result container is visible by removing the hidden class
+      continuePlanResultContainer.classList.remove("hidden");
+      
+      // Format and clean up the output text
+      const formattedOutput = typeof output === 'string' 
+        ? output.replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/\\t/g, "\t") 
+        : JSON.stringify(output, null, 2);
+      
+      // Update the continue plan content
+      continuePlanContent.textContent = formattedOutput;
+      
+      // Hide the options container since the selection has been made
+      optionsContainer.classList.add("hidden");
+    } catch (error) {
+      console.error("Error during option selection:", error);
+      
+      // Display error in continue plan result container
+      continuePlanResultContainer.classList.remove("hidden");
+      continuePlanContent.innerHTML = `
+        <div class="text-red-600">
+          <p>Error: ${error.message}</p>
+          <p>Please try again later.</p>
+        </div>
+      `;
+    } finally {
+      // Hide loading message
+      loadingMessage.style.display = "none";
+    }
+  };
 
   analyzeForm?.addEventListener("submit", async (event) => {
     event.preventDefault(); // Prevent the default form submission
@@ -168,8 +295,12 @@ const repository = await fetchRepository();
     // Show the loading message and spinner after the user confirms
     loadingMessage.style.display = "flex";
     
-    // Clear previous results
+    // Clear previous results and hide containers
     createPlanResultContainer.innerHTML = "";
+    runPlanResultContainer.innerHTML = "";
+    continuePlanResultContainer.classList.add("hidden");
+    continuePlanContent.textContent = "";
+    optionsContainer.classList.add("hidden");
 
     try {
       console.log("Create Plan function called");
@@ -231,14 +362,32 @@ const repository = await fetchRepository();
       const runPlanResult = await runPlanResponse.json();
       console.log("Run plan success:", runPlanResult);
 
-      // Make sure the result container is visible
-      runPlanResultContainer.classList.remove("hidden");
-
-      // Display the analysis result in the page
-      runPlanResultContainer.innerHTML = `
-        <h2>Analysis Result</h2>
-        <pre>${JSON.stringify(runPlanResult, null, 2)}</pre>
-      `;
+      // Extract guidance and options
+      const plan_run_id = runPlanResult.plan_run_id;
+      const guidance = runPlanResult.user_guidance;
+      const options = runPlanResult.options || [];
+      
+      // Format and clean up the guidance text
+      const formattedGuidance = guidance
+        .replace(/\\n/g, '\n')
+        .replace(/\\'/g, "'")
+        .replace(/\\t/g, "\t");
+      
+      // Display the cleaned up guidance
+      userGuidance.textContent = formattedGuidance;
+      
+      // Set up option buttons if options are available
+      if (options.length >= 2) {
+        option1Button.textContent = options[0];
+        option2Button.textContent = options[1];
+        
+        // Set up event listeners for the buttons
+        option1Button.onclick = () => handleOptionSelection(plan_run_id, options[0]);
+        option2Button.onclick = () => handleOptionSelection(plan_run_id, options[1]);
+        
+        // Show the options container
+        optionsContainer.classList.remove("hidden");
+      }
     } catch (error) {
       console.error("Error during analysis:", error);
 

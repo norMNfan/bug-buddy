@@ -20,5 +20,8 @@ class RunPlanResponse(BaseModel):
     user_guidance: str
     options: List[str]
 
+class ContinuePlanResponse(BaseModel):
+    output: str
+
 class PlanStatusResponse(BaseModel):
     output: str
