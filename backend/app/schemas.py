@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import List
+from typing import Any, List
+from portia import Plan
 
 
 class Repo(BaseModel):
@@ -13,4 +14,6 @@ class Repos(BaseModel):
 class Analysis(BaseModel):
     id: str
     log_group: str
-    output: str
+    plan_id: str
+    query_steps: List[Any]
+    plan: Plan

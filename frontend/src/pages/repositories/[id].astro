@@ -40,7 +40,7 @@ const repository = await fetchRepository();
         variant="contained"
         color="primary"
       >
-        Analyze Repo
+        Fix Bugs
       </Button>
     </form>
 
@@ -79,9 +79,9 @@ const repository = await fetchRepository();
     loadingMessage.style.display = "flex";
 
     try {
-      console.log("Analyze function called");
+      console.log("Create Plan function called");
       
-      const analyzeResponse = await fetch('http://localhost:8000/repos/analyze', {
+      const createPlanResponse = await fetch('http://localhost:8000/repos/createplan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,17 +92,42 @@ const repository = await fetchRepository();
         }),
       });
 
-      if (!analyzeResponse.ok) {
+      if (!createPlanResponse.ok) {
         throw new Error(`Error analyzing repositories: ${analyzeResponse.statusText}`);
       }
 
-      const result = await analyzeResponse.json();
-      console.log("Analysis result:", result);
+      const createPlanResult = await createPlanResponse.json();
+      const planId = createPlanResult.plan_id;
+
+      console.log("Create plan success:", createPlanResult);
+
+      analysisResultContainer.innerHTML = `
+        <h2>Plan Created</h2>
+        <p><strong>Plan ID:</strong> ${planId}</p>
+      `;
+
+      // Save and use the output value to call /repos/runplan
+      console.log("Step 2: Running plan with plan ID:", planId);
+
+      const runPlanResponse = await fetch('http://localhost:8000/repos/runplan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ "plan_id": planId }),
+      });
+
+      if (!runPlanResponse.ok) {
+        throw new Error(`Run plan failed: ${runPlanResponse.statusText}`);
+      }
+
+      const runPlanResult = await runPlanResponse.json();
+      console.log("Run plan success:", runPlanResult);
 
       // Display the analysis result in the page
       analysisResultContainer.innerHTML = `
         <h2>Analysis Result</h2>
-        <pre>${JSON.stringify(result, null, 2)}</pre>
+        <pre>${JSON.stringify(createPlanResult, null, 2)}</pre>
       `;
     } catch (error) {
       console.error("Error during analysis:", error);

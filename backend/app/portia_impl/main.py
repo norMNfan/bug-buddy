@@ -5,10 +5,13 @@ from portia import (
     InMemoryToolRegistry,
     LLMModel,
     LLMProvider,
+    Plan,
     Portia,
     PortiaToolRegistry,
+    StorageClass,
     example_tool_registry
 )
+from portia.storage import PortiaCloudStorage
 from .github_actions import *
 from .aws_actions import *
 
@@ -38,7 +41,8 @@ ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
 anthropic_config = Config.from_default(
     llm_provider=LLMProvider.ANTHROPIC,
     llm_model_name=LLMModel.CLAUDE_3_5_SONNET,
-    anthropic_api_key=ANTHROPIC_API_KEY
+    anthropic_api_key=ANTHROPIC_API_KEY,
+    storage_class=StorageClass.CLOUD
 )
 
 def instantiate_portia():
@@ -70,7 +74,8 @@ def initialise_aws():
 
     print(initialize_tool.run(ctx, access_key=AWS_ACCESS_KEY, secret_key=AWS_SECRET, region=AWS_REGION))
 
-def whole_flow():
+
+def create_plan():
     initialise_github()
 
     initialise_aws()
@@ -97,18 +102,23 @@ def whole_flow():
         11. In the final output, format the before and after diff using markdown
         """.format(GITHUB_USERNAME=GITHUB_USERNAME, REPO_NAME=REPO_NAME)
 
-    list_log_groups_plan = portia.plan(query)
+    plan = portia.plan(query)
 
-    print(list_log_groups_plan.pretty_print())
+    return plan
 
-    list_log_groups_run = portia.run_plan(list_log_groups_plan)
-    print(list_log_groups_run.model_dump_json(indent=2))
+def run_plan(plan_id: str):
+    portia = instantiate_portia()
+
+    my_store = PortiaCloudStorage(config=anthropic_config)
+
+    plan = my_store.get_plan(plan_id)
+
+    run = portia.run_plan(plan)
+    print(run.model_dump_json(indent=2))
     
-    return list_log_groups_run.model_dump_json(indent=2)
+    return run.model_dump_json(indent=2)
 
 
-def run():
-    return whole_flow()
 
 def notnotnotmain():
     AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
@@ -222,4 +232,4 @@ def notmain():
 
 
 if __name__ == "__main__":
-    run()
+    create_plan()
