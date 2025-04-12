@@ -58,8 +58,11 @@ const repository = await fetchRepository();
       </div>
     </div>
     
-    <!-- Analysis Result Container -->
-    <div id="analysisResult" class="mt-6 p-4 bg-gray-100 rounded-md shadow-sm hidden"></div>
+    <!-- Create Plan Result Container -->
+    <div id="createPlanResult" class="mt-6 p-4 bg-gray-100 rounded-md shadow-sm hidden"></div>
+
+    <!-- Run Plan Result Container -->
+    <div id="runPlanResult" class="mt-6 p-4 bg-gray-100 rounded-md shadow-sm hidden"></div>
 
     <!-- Loading spinner and message -->
     <div id="loadingMessage" style="display: none;" class="flex items-center gap-2 mt-6 justify-center">
@@ -141,7 +144,8 @@ const repository = await fetchRepository();
   // Ensure this code runs on the client-side
   const analyzeButton = document.getElementById("analyzeButton");
   const analyzeForm = document.getElementById("analyzeForm");
-  const analysisResultContainer = document.getElementById("analysisResult");
+  const createPlanResultContainer = document.getElementById("createPlanResult");
+  const runPlanResultContainer = document.getElementById("runPlanResult");
   const loadingMessage = document.getElementById("loadingMessage");
 
   analyzeForm?.addEventListener("submit", async (event) => {
@@ -165,7 +169,7 @@ const repository = await fetchRepository();
     loadingMessage.style.display = "flex";
     
     // Clear previous results
-    analysisResultContainer.innerHTML = "";
+    createPlanResultContainer.innerHTML = "";
 
     try {
       console.log("Create Plan function called");
@@ -194,10 +198,10 @@ const repository = await fetchRepository();
       console.log("plan_id:", planId);
 
       // Make sure the result container is visible by removing the hidden class
-      analysisResultContainer.classList.remove("hidden");
+      createPlanResultContainer.classList.remove("hidden");
 
       // Show the Plan ID in the UI
-      analysisResultContainer.innerHTML = `
+      createPlanResultContainer.innerHTML = `
         <h2>Plan Created</h2>
         <p><strong>Plan ID:</strong> ${planId}</p>
       `;
@@ -228,10 +232,10 @@ const repository = await fetchRepository();
       console.log("Run plan success:", runPlanResult);
 
       // Make sure the result container is visible
-      analysisResultContainer.classList.remove("hidden");
+      runPlanResultContainer.classList.remove("hidden");
 
       // Display the analysis result in the page
-      analysisResultContainer.innerHTML = `
+      runPlanResultContainer.innerHTML = `
         <h2>Analysis Result</h2>
         <pre>${JSON.stringify(runPlanResult, null, 2)}</pre>
       `;
@@ -239,10 +243,10 @@ const repository = await fetchRepository();
       console.error("Error during analysis:", error);
 
       // Make sure the result container is visible
-      analysisResultContainer.classList.remove("hidden");
+      runPlanResultContainer.classList.remove("hidden");
 
       // Display error message in the page
-      analysisResultContainer.innerHTML = `
+      runPlanResultContainer.innerHTML = `
         <h2>Error</h2>
         <p>There was an error processing the analysis. Please try again later.</p>
         <p>Error details: ${error.message}</p>

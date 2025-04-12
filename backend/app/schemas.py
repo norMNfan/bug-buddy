@@ -16,7 +16,9 @@ class CreatePlanResponse(BaseModel):
     
 
 class RunPlanResponse(BaseModel):
-    output: str
+    plan_run_id: str
+    user_guidance: str
+    options: List[str]
 
 class PlanStatusResponse(BaseModel):
     output: str

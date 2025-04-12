@@ -86,15 +86,20 @@ async def analyze(request: CreatePlanRequest):
     return response
 
 
-@router.post("/runplan", response_model=CreatePlanResponse)
+@router.post("/runplan", response_model=RunPlanResponse)
 @log_operation
 async def analyze(request: RunPlanRequest):
     plan_id = request.plan_id
 
     plan_result = run_plan(plan_id)
+    print(f"plan_result: {plan_result}")
+
+    plan_run_id = re.search(r"plan_run_id=PlanRunUUID\(uuid=UUID\('([0-9a-f-]+)'\)\)", str(plan_result)).group(1)
 
     response = RunPlanResponse(
-        output=str(plan_result)
+        plan_run_id=plan_run_id,
+        user_guidance=plan_result.user_guidance,
+        options=plan_result.options
     )
 
     return response
