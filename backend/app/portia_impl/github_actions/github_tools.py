@@ -115,7 +115,7 @@ class OnErrorLogFoundHumanDecisionTool(Tool):
 class ListGitHubRepos(Tool):
     id: str = "list_github_repos"
     name: str = "list_github_repos"  
-    description: str = "List all GitHub repositories for a given user."  
+    description: str = "List all GitHub repositories for a given owner/user."  
     args_schema: type[BaseModel] = ListReposSchema
     output_schema: tuple[str, str] = ("List", "List repositories for a user or the authenticated account")
 
@@ -129,9 +129,9 @@ class ListGitHubRepos(Tool):
 class ListGitHubRepoFiles(Tool):
     id: str = "list_github_repo_files"
     name: str = "list_github_repo_files"  
-    description: str = "List files in a GitHub repository at a given path."  
+    description: str = "List all files in a GitHub repository at a given path."  
     args_schema: type[BaseModel] = ListFilesSchema
-    output_schema: tuple[str, str] = ("List", "List files in a repository at a given path")
+    output_schema: tuple[str, str] = ("List", "List of files in a repository at a given path")
 
     def run(self, _:ToolRunContext, repo: str, path: str = "") -> Any:
         client = GitHubClientManager.get_client()

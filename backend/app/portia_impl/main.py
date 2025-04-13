@@ -42,8 +42,8 @@ load_dotenv()
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
 
 anthropic_config = Config.from_default(
-    llm_provider=LLMProvider.ANTHROPIC,
-    llm_model_name=LLMModel.CLAUDE_3_5_SONNET,
+    llm_provider=LLMProvider.GOOGLE_GENERATIVE_AI,
+    llm_model_name=LLMModel.CLAUDE_3_7_SONNET,
     anthropic_api_key=ANTHROPIC_API_KEY,
     storage_class=StorageClass.CLOUD
 )
@@ -89,8 +89,8 @@ def create_plan():
 
     REPO_NAME = os.getenv('GITHUB_REPO')
 
-    HEAD_BRANCH = "bug-fix"
-    BASE_BRANCH = "main"
+    HEAD_BRANCH = os.getenv("HEAD_BRANCH")
+    BASE_BRANCH = os.getenv("BASE_BRANCH")
 
 
     query = """
@@ -104,7 +104,7 @@ def create_plan():
         7. list files under this repo: {REPO_NAME} for owner: {GITHUB_USERNAME} at the root of the repo
         8. from those list of files, select the file that is best associated with the file for which the error is in error using the owner: {GITHUB_USERNAME} and repo: {REPO_NAME}. Select the file by name as you dedeuce from the error, not by some arbitrary path which doesn't exist.
         9. read the selected file's contents. Use the Use the repo: {REPO_NAME} and owner: {GITHUB_USERNAME}
-        10. based on the human clarification resolution, you should do either of the following:
+        10. based on the human clarification resolution, you should do either create a PR if the human said PR or create an issue if the human said ISSUE:
             if the human clarification resolved as ISSUE, create an ISSUE like a bug report, stating the errors found in the logs. Use the repo: {REPO_NAME} and owner: {GITHUB_USERNAME}. you decide the title and body appropriately of the issue
             if the human clarifcation resolved as PR, generate a fix taking into account the errors and the selected file content. Then, github_add_commit_file this fix to the selected file in the repo: {REPO_NAME}; this commit should be on branch: {HEAD_BRANCH} with base_branch as {BASE_BRANCH}; so basically commit the selected file with your fix to the branch: {HEAD_BRANCH}. Then create_github_pull_request create a PR and you appropriately decide on the body and title of the PR. Use the repo: {REPO_NAME} head_branch={HEAD_BRANCH}, and base_branch={BASE_BRANCH}.
         """.format(GITHUB_USERNAME=GITHUB_USERNAME, REPO_NAME=REPO_NAME, BASE_BRANCH=BASE_BRANCH, HEAD_BRANCH=HEAD_BRANCH)
@@ -121,9 +121,7 @@ def run_plan(plan_id: str):
     plan = my_store.get_plan(plan_id)
 
     run = portia.run_plan(plan)
-    # print(run.model_dump_json(indent=2))
     
-    # return run.model_dump_json(indent=2)
     return run.outputs.clarifications[0]
 
 
@@ -135,14 +133,12 @@ def resume_run(plan_run_id:str, user_input:str):
     plan_run = my_store.get_plan_run(plan_run_id)
     plan = my_store.get_plan(plan_run.plan_id)
 
-    # resumed_plan_run = portia.resume(plan_run, plan_run_id)
 
     while plan_run.state == PlanRunState.NEED_CLARIFICATION:
         for clarification in plan_run.get_outstanding_clarifications():
             plan_run = portia.resolve_clarification(clarification, user_input, plan_run)
 
         plan_run = portia.resume(plan_run, plan_run.id)
-        # portia.run
     
     return plan_run
 
