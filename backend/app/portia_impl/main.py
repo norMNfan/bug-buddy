@@ -42,7 +42,7 @@ load_dotenv()
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
 
 anthropic_config = Config.from_default(
-    llm_provider=LLMProvider.GOOGLE_GENERATIVE_AI,
+    llm_provider=LLMProvider.ANTHROPIC,
     llm_model_name=LLMModel.CLAUDE_3_7_SONNET,
     anthropic_api_key=ANTHROPIC_API_KEY,
     storage_class=StorageClass.CLOUD
