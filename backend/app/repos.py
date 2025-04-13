@@ -22,13 +22,6 @@ class UserEmailRequest(BaseModel):
     user_email: str
 
 
-class CreateSwitchRequest(BaseModel):
-    user_email: str
-    name: str
-    content: str
-    interval: int
-
-
 class AddRepoRequest(BaseModel):
     username: str
     id: str

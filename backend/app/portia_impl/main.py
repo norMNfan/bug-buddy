@@ -5,17 +5,14 @@ from portia import (
     InMemoryToolRegistry,
     LLMModel,
     LLMProvider,
-    Plan,
     Portia,
     StorageClass,
-    PortiaToolRegistry,
     StorageClass,
-    PlanRunState,
-    example_tool_registry
+    PlanRunState
 )
 from portia.storage import PortiaCloudStorage
-from github_actions import *
-from aws_actions import *
+from .github_actions import *
+from .aws_actions import *
 
 github_tools = InMemoryToolRegistry.from_local_tools([
     # InitializeGitHubClient(),
