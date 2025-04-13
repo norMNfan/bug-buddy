@@ -40,11 +40,12 @@ aws_tools = InMemoryToolRegistry.from_local_tools([
 load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 anthropic_config = Config.from_default(
-    llm_provider=LLMProvider.ANTHROPIC,
-    llm_model_name=LLMModel.CLAUDE_3_7_SONNET,
-    anthropic_api_key=ANTHROPIC_API_KEY,
+    llm_provider=LLMProvider.OPENAI,
+    llm_model_name=LLMModel.GPT_4_O,
+    anthropic_api_key=OPENAI_API_KEY,
     storage_class=StorageClass.CLOUD
 )
 
@@ -104,9 +105,13 @@ def create_plan():
         7. list files under this repo: {REPO_NAME} for owner: {GITHUB_USERNAME} at the root of the repo
         8. from those list of files, select the file that is best associated with the file for which the error is in error using the owner: {GITHUB_USERNAME} and repo: {REPO_NAME}. Select the file by name as you dedeuce from the error, not by some arbitrary path which doesn't exist.
         9. read the selected file's contents. Use the Use the repo: {REPO_NAME} and owner: {GITHUB_USERNAME}
-        10. based on the human clarification resolution, you should do either create a PR if the human said PR or create an issue if the human said ISSUE:
-            if the human clarification resolved as ISSUE, create an ISSUE like a bug report, stating the errors found in the logs. Use the repo: {REPO_NAME} and owner: {GITHUB_USERNAME}. you decide the title and body appropriately of the issue
-            if the human clarifcation resolved as PR, generate a fix taking into account the errors and the selected file content. Then, github_add_commit_file this fix to the selected file in the repo: {REPO_NAME}; this commit should be on branch: {HEAD_BRANCH} with base_branch as {BASE_BRANCH}; so basically commit the selected file with your fix to the branch: {HEAD_BRANCH}. Then create_github_pull_request create a PR and you appropriately decide on the body and title of the PR. Use the repo: {REPO_NAME} head_branch={HEAD_BRANCH}, and base_branch={BASE_BRANCH}.
+        10. based on the human clarification resolution, you should do either create a PR if the human said PR or create an ISSUE if the human said ISSUE
+            if the human said PR do the following (ONLY DO THESE IF PR):
+                 - generate a fix taking into account the errors and the selected file content.
+                 - Then commit this fix to the selected file in the repo: {REPO_NAME} using github_add_commit_file tool; this commit should be on branch: {HEAD_BRANCH} as the feature branch with base_branch as {BASE_BRANCH}.
+                 - Then createa a github pull request from the feature branch {HEAD_BRANCH} using the create_github_pull_request tool; you appropriately decide on the body and title of the PR. Use the repo: {REPO_NAME} head_branch={HEAD_BRANCH}, and base_branch={BASE_BRANCH}.
+            
+            else if the human said ISSUE, create an ISSUE like a bug report, stating the errors found in the logs. Use the repo: {REPO_NAME} and owner: {GITHUB_USERNAME}. you decide the title and body appropriately of the issue
         """.format(GITHUB_USERNAME=GITHUB_USERNAME, REPO_NAME=REPO_NAME, BASE_BRANCH=BASE_BRANCH, HEAD_BRANCH=HEAD_BRANCH)
 
     plan = portia.plan(query)
