@@ -1,11 +1,9 @@
 ---
 import Layout from '@layouts/Default.astro';
-import RepositoryDetailPage from "../../components/RepositoryDetailPage.tsx"
 import Button from '@mui/material/Button';
 
 const { id } = Astro.params;
 const token = import.meta.env.GITHUB_TOKEN;
-const PORTIA_API_KEY = import.meta.env.PORTIA_API_KEY;
 
 async function fetchRepository() {
   const url = `https://api.github.com/repositories/${id}`;
@@ -66,7 +64,7 @@ const repository = await fetchRepository();
 
     <!-- Continue Plan Result Container -->
     <div id="continuePlanResult" class="mt-6 p-4 bg-gray-100 rounded-md shadow-sm hidden">
-      <h3 class="text-lg font-semibold mb-2">Continue Plan Result</h3>
+      <h3 class="text-lg font-semibold mb-2">Plan Run Result</h3>
       <div id="continuePlanContent" class="whitespace-pre-wrap text-sm"></div>
     </div>
 
@@ -85,7 +83,7 @@ const repository = await fetchRepository();
     <!-- Loading spinner and message -->
     <div id="loadingMessage" style="display: none;" class="flex items-center gap-2 mt-6 justify-center">
       <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
-      <span id="loadingText" class="text-lg">Creating Plan...</span>
+      <span id="loadingText" class="text-lg">🏗️ Creating Plan...</span>
     </div>
   </section>
 </main>
@@ -221,7 +219,7 @@ const repository = await fetchRepository();
     
     // Update loading message
     const loadingText = document.getElementById("loadingText");
-    loadingText.textContent = "Processing Your Selection...";
+    loadingText.textContent = "Running Plan...";
     loadingMessage.style.display = "flex";
     
     try {
@@ -333,15 +331,13 @@ const repository = await fetchRepository();
 
       // Show the Plan ID in the UI
       createPlanResultContainer.innerHTML = `
-        <h2>Plan Created</h2>
+        <h2>📝 Plan Created</h2>
         <p><strong>Plan ID:</strong> ${planId}</p>
       `;
 
       //////////////
       // RUN PLAN //
       //////////////
-
-      // Update loading message for running plan
       loadingText.textContent = "Running Plan...";
       
       // Save and use the output value to call /repos/runplan
