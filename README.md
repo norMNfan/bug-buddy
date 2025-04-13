@@ -73,7 +73,7 @@ docker-compose up --build
 ## User Workflow
 1. **Connect** your AWS and Github account
 Clicking 'Sign in with GitHub' will redirect you to a GitHub page requesting you to authorize Bug Buddy to make actions to GitHub on your behalf.
-<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/Screenshot%202025-04-13%20at%208.57.33%20AM.png" width="100%" alt="Connect to GitHub">
+<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step1.png" width="100%" alt="Connect to GitHub">
 
 2. **Configure**: Setup your repositories and log groups to monitor
 ![](https://github.com/norMNfan/bug-buddy/blob/main/images/Screenshot 2025-04-13 at 9.00.03 AM.png)
