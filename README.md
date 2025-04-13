@@ -91,7 +91,7 @@ Clicking 'Sign in with GitHub' will redirect you to a GitHub page requesting you
 <img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step6.png" width="100%" alt="Connect to GitHub">
 
 7. **Pull Request Creation**: The Pull Request will be created in GitHub
-<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/pull-request.pdf" width="100%" alt="Connect to GitHub">
+<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/pull-request.png" width="100%" alt="Connect to GitHub">
 
 ## Tech Stack
 
