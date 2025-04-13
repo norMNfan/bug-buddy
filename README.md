@@ -76,19 +76,19 @@ Clicking 'Sign in with GitHub' will redirect you to a GitHub page requesting you
 <img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step1.png" width="100%" alt="Connect to GitHub">
 
 2. **Configure**: Setup your repositories and log groups to monitor
-![](https://github.com/norMNfan/bug-buddy/blob/main/images/Screenshot 2025-04-13 at 9.00.03 AM.png)
+<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step2.png" width="100%" alt="Connect to GitHub">
 
 3. **Analyze**: Start the analysis process with a single click
-![](https://github.com/norMNfan/bug-buddy/blob/main/images/Screenshot 2025-04-13 at 9.00.55 AM.png)
+<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step3.png" width="100%" alt="Connect to GitHub">
 
 4. **Review**: Examine the AI-generated diagnosis and proposed fixes
-![](https://github.com/norMNfan/bug-buddy/blob/main/images/Screenshot 2025-04-13 at 8.33.45 AM.png)
+<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step4.png" width="100%" alt="Connect to GitHub">
 
 5. **Approve**: Choose to implement the suggested fix
-![](https://github.com/norMNfan/bug-buddy/blob/main/images/Screenshot 2025-04-13 at 8.36.14 AM.png)
+<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step5.png" width="100%" alt="Connect to GitHub">
 
 6. **Issue Creation**: The PR or Issue will be created in Github
-![](https://github.com/norMNfan/bug-buddy/blob/main/images/Screenshot 2025-04-13 at 8.36.32 AM.png)
+<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step6.png" width="100%" alt="Connect to GitHub">
 
 ## Tech Stack
 
