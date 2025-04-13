@@ -87,8 +87,11 @@ Clicking 'Sign in with GitHub' will redirect you to a GitHub page requesting you
 5. **Approve**: Choose to implement the suggested fix
 <img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step5.png" width="100%" alt="Connect to GitHub">
 
-6. **Issue Creation**: The PR or Issue will be created in Github
+6. **Issue Creation**: The Issue will be created in Github
 <img src="https://github.com/norMNfan/bug-buddy/blob/main/images/step6.png" width="100%" alt="Connect to GitHub">
+
+7. **Pull Request Creation**: The Pull Request will be created in GitHub
+<img src="https://github.com/norMNfan/bug-buddy/blob/main/images/pull-request.pdf" width="100%" alt="Connect to GitHub">
 
 ## Tech Stack
 
