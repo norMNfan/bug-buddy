@@ -1,5 +1,12 @@
 # bug-buddy 🐛🔍
 
+<p align="center">
+  <video width="100%" controls>
+    <source src="https://raw.githubusercontent.com/norMNfan/bug-buddy/main/images/bug-buddy-demo.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</p>
+
 **Bud Buddy** is a web application that leverages AI to automatically detect, analyze, and fix errors in your applications. The app connects to your applications logs to fetch error logs, pulls your code from GitHub, analyzes the issue, and creates GitHub issues with proposed fixes.
 
 ## Features
