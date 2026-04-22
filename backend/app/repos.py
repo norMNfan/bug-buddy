@@ -10,7 +10,14 @@ from functools import wraps
 import asyncio
 
 from .database import get_db
-from .schemas import ContinuePlanResponse, CreatePlanResponse, RunPlanResponse, PlanStatusResponse, Repo, Repos
+from .schemas import (
+    ContinuePlanResponse,
+    CreatePlanResponse,
+    RunPlanResponse,
+    PlanStatusResponse,
+    Repo,
+    Repos,
+)
 from .models import Repo as RepoModel
 
 from .portia_impl import create_plan, run_plan, resume_run
@@ -40,10 +47,10 @@ class CreatePlanRequest(BaseModel):
 class RunPlanRequest(BaseModel):
     plan_id: str
 
+
 class ContinuePlanRequest(BaseModel):
     plan_run_id: str
     option: str
-
 
 
 def log_operation(func):
@@ -75,10 +82,8 @@ async def createplan(request: CreatePlanRequest):
 
     match = re.search(r"UUID\('([a-f0-9\-]{36})'\)", str(plan))
     plan_id = "plan-" + match.group(1)
-    
-    response = CreatePlanResponse(
-        plan_id=plan_id
-    )
+
+    response = CreatePlanResponse(plan_id=plan_id)
 
     return response
 
@@ -91,12 +96,14 @@ async def runplan(request: RunPlanRequest):
     plan_result = run_plan(plan_id)
     print(f"plan_result: {plan_result}")
 
-    plan_run_id = re.search(r"plan_run_id=PlanRunUUID\(uuid=UUID\('([0-9a-f-]+)'\)\)", str(plan_result)).group(1)
+    plan_run_id = re.search(
+        r"plan_run_id=PlanRunUUID\(uuid=UUID\('([0-9a-f-]+)'\)\)", str(plan_result)
+    ).group(1)
 
     response = RunPlanResponse(
         plan_run_id=plan_run_id,
         user_guidance=plan_result.user_guidance,
-        options=plan_result.options
+        options=plan_result.options,
     )
 
     return response
@@ -107,9 +114,7 @@ async def runplan(request: RunPlanRequest):
 async def continueplan(request: ContinuePlanRequest):
     res = resume_run(request.plan_run_id, request.option)
 
-    response = ContinuePlanResponse(
-        output=str(res)
-    )
+    response = ContinuePlanResponse(output=str(res))
 
     return response
 
@@ -117,7 +122,6 @@ async def continueplan(request: ContinuePlanRequest):
 @router.get("/getplanstatus/{plan_id}", response_model=PlanStatusResponse)
 @log_operation
 def get_plan_status(plan_id: str):
-    
     try:
         # Use environment variable or securely stored key
         api_key = os.getenv("PORTIA_API_KEY")
@@ -135,7 +139,7 @@ def get_plan_status(plan_id: str):
         response = requests.get(portia_url, headers=headers)
         print(f"Porta get plan status response: {response['steps']}")
 
-        res = PlanStatusResponse(output=str(response['steps']))
+        res = PlanStatusResponse(output=str(response["steps"]))
 
         return res
 
@@ -155,11 +159,11 @@ def get_repos(db: Session = Depends(get_db)):
     repos = db.query(RepoModel).all()
 
     response = Repos(
-        repos = [
+        repos=[
             Repo(
-                id = repo.id,
-                username = repo.username,
-                full_name = repo.full_name,
+                id=repo.id,
+                username=repo.username,
+                full_name=repo.full_name,
             )
             for repo in repos
         ]
@@ -185,9 +189,7 @@ async def add_repos(request: AddReposRequest, db: Session = Depends(get_db)):
         else:
             # Insert new repo
             new_repo = RepoModel(
-                id=repo.id,
-                username=repo.username,
-                full_name=repo.full_name
+                id=repo.id, username=repo.username, full_name=repo.full_name
             )
             db.add(new_repo)
             print(f"Added new repo: {repo.id}")
