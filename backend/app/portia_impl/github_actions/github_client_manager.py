@@ -1,5 +1,6 @@
 from .github_client import GitHubClient
 
+
 class GitHubClientManager:
     _client: GitHubClient = None
 
@@ -10,5 +11,7 @@ class GitHubClientManager:
     @classmethod
     def get_client(cls) -> GitHubClient:
         if cls._client is None:
-            raise RuntimeError("GitHub client has not been initialized. Please run InitializeGitHubClient first.")
+            raise RuntimeError(
+                "GitHub client has not been initialized. Please run InitializeGitHubClient first."
+            )
         return cls._client

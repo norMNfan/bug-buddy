@@ -7,44 +7,63 @@ from portia import (
     LLMProvider,
     Portia,
     StorageClass,
-    StorageClass,
-    PlanRunState
+    PlanRunState,
 )
 from portia.storage import PortiaCloudStorage
-from .github_actions import *
-from .aws_actions import *
+from .github_actions import (
+    InitializeGitHubClient,
+    OnErrorLogFoundHumanDecisionTool,
+    ListGitHubRepos,
+    ListGitHubRepoFiles,
+    ReadGitHubFile,
+    GetGitHubFileWithMetadata,
+    CreateGitHubIssue,
+    GitHubAddCommitFile,
+    CreateGitHubPullRequest,
+)
+from .aws_actions import (
+    InitializeAWSClient,
+    ListAWSLogGroups,
+    GetMostRecentLogStream,
+    ListenForErrorLogs,
+)
 
-github_tools = InMemoryToolRegistry.from_local_tools([
-    # InitializeGitHubClient(),
-    ListGitHubRepos(),
-    ListGitHubRepoFiles(),
-    ReadGitHubFile(),
-    GetGitHubFileWithMetadata(),
-    CreateGitHubIssue(),
-    GitHubAddCommitFile(),
-    CreateGitHubPullRequest(),
-    OnErrorLogFoundHumanDecisionTool()
-])
+github_tools = InMemoryToolRegistry.from_local_tools(
+    [
+        # InitializeGitHubClient(),
+        ListGitHubRepos(),
+        ListGitHubRepoFiles(),
+        ReadGitHubFile(),
+        GetGitHubFileWithMetadata(),
+        CreateGitHubIssue(),
+        GitHubAddCommitFile(),
+        CreateGitHubPullRequest(),
+        OnErrorLogFoundHumanDecisionTool(),
+    ]
+)
 
-aws_tools = InMemoryToolRegistry.from_local_tools([
-    # InitializeAWSClient(),
-    ListAWSLogGroups(),
-    GetMostRecentLogStream(),
-    ListenForErrorLogs()
-])
+aws_tools = InMemoryToolRegistry.from_local_tools(
+    [
+        # InitializeAWSClient(),
+        ListAWSLogGroups(),
+        GetMostRecentLogStream(),
+        ListenForErrorLogs(),
+    ]
+)
 
 
 load_dotenv()
 
-ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 anthropic_config = Config.from_default(
     llm_provider=LLMProvider.OPENAI,
     llm_model_name=LLMModel.GPT_4_O,
     anthropic_api_key=OPENAI_API_KEY,
-    storage_class=StorageClass.CLOUD
+    storage_class=StorageClass.CLOUD,
 )
+
 
 def instantiate_portia():
     portia = Portia(config=anthropic_config, tools=github_tools + aws_tools)
@@ -52,13 +71,14 @@ def instantiate_portia():
 
 
 def initialise_github():
-    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-    GITHUB_USERNAME = os.getenv('GITHUB_USERNAME')
+    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+    GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
 
-    ctx = {}  
+    ctx = {}
     initialize_tool = InitializeGitHubClient()
     print("Initializing GitHub Client...")
     print(initialize_tool.run(ctx, token=GITHUB_TOKEN, username=GITHUB_USERNAME))
+
 
 def initialise_aws():
     AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
@@ -69,10 +89,14 @@ def initialise_aws():
     print(f"SECRET: {AWS_SECRET}")
     print(f"REGION: {AWS_REGION}")
 
-    ctx = {}  
+    ctx = {}
     initialize_tool = InitializeAWSClient()
 
-    print(initialize_tool.run(ctx, access_key=AWS_ACCESS_KEY, secret_key=AWS_SECRET, region=AWS_REGION))
+    print(
+        initialize_tool.run(
+            ctx, access_key=AWS_ACCESS_KEY, secret_key=AWS_SECRET, region=AWS_REGION
+        )
+    )
 
 
 def create_plan():
@@ -82,14 +106,12 @@ def create_plan():
 
     portia = instantiate_portia()
 
-    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-    GITHUB_USERNAME = os.getenv('GITHUB_USERNAME')
+    GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
 
-    REPO_NAME = os.getenv('GITHUB_REPO')
+    REPO_NAME = os.getenv("GITHUB_REPO")
 
     HEAD_BRANCH = os.getenv("HEAD_BRANCH")
     BASE_BRANCH = os.getenv("BASE_BRANCH")
-
 
     query = """
         1. List the log groups
@@ -109,11 +131,17 @@ def create_plan():
                  - Then createa a github pull request from the feature branch {HEAD_BRANCH} using the create_github_pull_request tool; you appropriately decide on the body and title of the PR. Use the repo: {REPO_NAME} head_branch={HEAD_BRANCH}, and base_branch={BASE_BRANCH}.
             
             else if the human said ISSUE, create an ISSUE like a bug report, stating the errors found in the logs. Use the repo: {REPO_NAME} and owner: {GITHUB_USERNAME}. you decide the title and body appropriately of the issue
-        """.format(GITHUB_USERNAME=GITHUB_USERNAME, REPO_NAME=REPO_NAME, BASE_BRANCH=BASE_BRANCH, HEAD_BRANCH=HEAD_BRANCH)
+        """.format(
+        GITHUB_USERNAME=GITHUB_USERNAME,
+        REPO_NAME=REPO_NAME,
+        BASE_BRANCH=BASE_BRANCH,
+        HEAD_BRANCH=HEAD_BRANCH,
+    )
 
     plan = portia.plan(query)
 
     return plan
+
 
 def run_plan(plan_id: str):
     portia = instantiate_portia()
@@ -123,25 +151,23 @@ def run_plan(plan_id: str):
     plan = my_store.get_plan(plan_id)
 
     run = portia.run_plan(plan)
-    
+
     return run.outputs.clarifications[0]
 
 
-def resume_run(plan_run_id:str, user_input:str):
+def resume_run(plan_run_id: str, user_input: str):
     portia = instantiate_portia()
 
     my_store = PortiaCloudStorage(config=anthropic_config)
 
     plan_run = my_store.get_plan_run(plan_run_id)
-    plan = my_store.get_plan(plan_run.plan_id)
-
 
     while plan_run.state == PlanRunState.NEED_CLARIFICATION:
         for clarification in plan_run.get_outstanding_clarifications():
             plan_run = portia.resolve_clarification(clarification, user_input, plan_run)
 
         plan_run = portia.resume(plan_run, plan_run.id)
-    
+
     return plan_run
 
 
